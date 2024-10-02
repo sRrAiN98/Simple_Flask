@@ -95,7 +95,7 @@ vs:
         port: 5001
 
 cert:
-  create: false
+  create: true
   secretName: testapp1-tls-secret
   commonName: testapp1.srrain.store
   dnsNames:
