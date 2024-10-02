@@ -1,0 +1,25 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: grafana-gateway
+spec:
+  selector:
+    istio: ingressgateway  # 사용할 Istio 인그레스 게이트웨이
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    # tls:
+    #   httpsRedirect: true 
+    hosts:
+    - "grafana.srrain.store"
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    hosts:
+    - "grafana.srrain.store"
+    tls:
+      mode: SIMPLE
+      credentialName: grafana-tls-secret 
