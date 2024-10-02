@@ -25,7 +25,6 @@ apps:
     valueFiles: values-app2.yaml
   - name: app3
     valueFiles: values-app3.yaml
-이와 같은 구조를 통해 각 애플리케이션의 이름과 관련된 values.yaml 파일을 지정할 수 있습니다.
 ```
 이와 같은 구조를 통해 각 애플리케이션의 이름과 관련된 `values.yaml` 파일을 지정할 수 있습니다.
 
