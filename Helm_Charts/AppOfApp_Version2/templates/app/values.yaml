@@ -49,21 +49,21 @@ ingress:
   annotations: 
     cert-manager.io/issuer: letsencrypt-prod
   hosts:
-    - host: app.srrain.store
+    - host: testapp1.srrain.store
       paths:
         - path: /
           pathType: ImplementationSpecific
           # serviceName: service
   tls: 
   - hosts:
-    - app.srrain.store
-    secretName: app-tls
+    - testapp1.srrain.store
+    secretName: testapp1-tls
 
 
 # istio gateway
 gateway:
   create: true  # 또는 false
-  name: app  # create가 false일 때 사용할 게이트웨이 이름
+  name: testapp1  # create가 false일 때 사용할 게이트웨이 이름
   servers:
     - port:
         number: 80
@@ -81,25 +81,25 @@ gateway:
         - "*.srrain.store"
       tls:
         mode: SIMPLE
-        credentialName: app-tls-secret
+        credentialName: testapp1-tls-secret
 
 # istio virtualservice
 vs:
   create: true  # 또는 false
   hosts:
-    - "app.srrain.store"
+    - "testapp1.srrain.store"
   paths:
     - path: /
       backend:
-        host: app
+        host: testapp1
         port: 5001
 
 cert:
   create: false
-  secretName: app-tls-secret
-  commonName: app.srrain.store
+  secretName: testapp1-tls-secret
+  commonName: testapp1.srrain.store
   dnsNames:
-    - app.srrain.store
+    - testapp1.srrain.store
   issuerRef:
     name: letsencrypt-prod-istio
     kind: ClusterIssuer
