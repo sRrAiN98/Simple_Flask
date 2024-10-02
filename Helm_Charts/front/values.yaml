@@ -26,6 +26,7 @@ serviceAccount:
 podAnnotations:
   # instrumentation.opentelemetry.io/inject-python: "false"
   # sidecar.opentelemetry.io/inject: "false"
+  sidecar.istio.io/proxyCPU: "10m"
   # reloader.stakater.com/auto: "false"
 
 podSecurityContext: {}
