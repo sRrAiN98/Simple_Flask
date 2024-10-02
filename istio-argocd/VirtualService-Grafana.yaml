@@ -6,7 +6,7 @@ spec:
   hosts:
   - "grafana.srrain.store"
   gateways:
-  - argocd-gateway
+  - grafana-gateway
   http:
   - match:
       - uri:
