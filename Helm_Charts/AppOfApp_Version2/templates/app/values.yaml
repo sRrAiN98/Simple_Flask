@@ -109,8 +109,8 @@ resources:
   #   cpu: 1000m
   #   memory: 1024Mi
   requests:
-    cpu: 10m
-    memory: "10Mi"
+    cpu: 1m
+    memory: "150Mi"
 
 autoscaling:
   enabled: true
