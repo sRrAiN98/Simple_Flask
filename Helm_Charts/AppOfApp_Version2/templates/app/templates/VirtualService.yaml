@@ -1,0 +1,24 @@
+{{- if .Values.vs.create -}}
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ include "testapp.fullname" . }}
+spec:
+  hosts:
+    {{- range .Values.vs.hosts }}
+    - {{ . | quote }}
+    {{- end }}
+  gateways:
+    - {{ if .Values.gateway.create }}{{ include "testapp.fullname" . }}{{ else }}{{ .Values.gateway.name }}{{ end }}  
+  http:
+    {{- range .Values.vs.paths }}
+    - match:
+        - uri:
+            prefix: {{ .path }}
+      route:
+        - destination:
+            host: {{ .backend.host }}
+            port:
+              number: {{ .backend.port }}
+    {{- end }}
+{{- end }}

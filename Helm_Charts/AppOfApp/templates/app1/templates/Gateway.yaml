@@ -1,0 +1,32 @@
+{{- if .Values.gateway.create -}}
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: {{ if .Values.gateway.create }}{{ include "app1.fullname" . }}{{ else }}{{ .Values.gateway.name }}{{ end }}
+spec:
+  selector:
+    istio: ingressgateway  
+  servers:
+    {{- range .Values.gateway.servers }}
+    - port:
+        number: {{ .port.number }}
+        name: {{ .port.name }}
+        protocol: {{ .port.protocol }}
+      {{- if .tls }}
+      tls:
+        {{- if .tls.httpsRedirect }}
+        httpsRedirect: {{ .tls.httpsRedirect }}
+        {{- end }}
+        {{- if .tls.mode }}
+        mode: {{ .tls.mode }}
+        {{- end }}
+        {{- if .tls.credentialName }}
+        credentialName: {{ .tls.credentialName }}
+        {{- end }}
+      {{- end }}
+      hosts:
+        {{- range .hosts }}
+        - {{ . | quote  }}
+        {{- end }}
+    {{- end }}
+{{- end }}

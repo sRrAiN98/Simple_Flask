@@ -1,0 +1,7 @@
+project_id = "copper-tracker-436305-d3" 
+cluster_name = "gke-on-vpc-cluster"
+region = "asia-northeast3"
+network = "gke-network"
+subnetwork = "gke-subnet"
+ip_range_pods_name = "ip-range-pods"
+ip_range_services_name = "ip-range-svc"

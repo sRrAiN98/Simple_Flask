@@ -1,0 +1,57 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "Source_Code/**"  # Source_Code 폴더 내의 모든 파일 및 하위 폴더 변경 시
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Determine modified apps
+        id: modified-apps
+        run: |
+          modified_apps=""
+          git diff --name-only HEAD~1 HEAD 
+          if git diff --name-only HEAD~1 HEAD | grep -q '^Source_Code/app1/'; then
+            echo "app1" >> apps.txt
+            echo "app1"
+          fi
+          if git diff --name-only HEAD~1 HEAD | grep -q '^Source_Code/app2/'; then
+            echo "app2" >> apps.txt
+            echo "app2"
+          fi
+          if git diff --name-only HEAD~1 HEAD | grep -q '^Source_Code/app3/'; then
+            echo "app3" >> apps.txt
+            echo "app3"
+          fi
+          cat apps.txt
+
+      - name: Build and Push Docker images
+        run: |
+          if [[ -f apps.txt ]] && [[ -s apps.txt ]]; then  # apps.txt가 존재하고 비어있지 않은 경우
+            while read -r app; do
+              echo "Building and pushing $app"
+              docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/$app ./Source_Code/$app
+              docker push ${{ secrets.DOCKERHUB_USERNAME }}/$app
+            done < apps.txt
+          else
+            echo "No modified apps found, skipping build."
+          fi

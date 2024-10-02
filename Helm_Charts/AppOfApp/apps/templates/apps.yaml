@@ -1,0 +1,28 @@
+{{- range .Values.apps }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .name }}
+  namespace: argocd
+
+spec:
+  destination:
+    namespace: {{ $.Values.spec.destination.namespace }}
+    server: {{ $.Values.spec.destination.server }}
+
+  project: {{ $.Values.spec.project | default "default" }}
+
+  source:
+    helm:
+      valueFiles:
+        - {{ $.Values.spec.source.valueFiles | default "values.yaml" | quote }}
+    path: {{ $.Values.spec.source.path }}/{{ .name }}
+    repoURL: {{ $.Values.spec.source.repoURL }}
+    targetRevision: {{ $.Values.spec.source.targetRevision }}
+
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
+---
+{{- end }}

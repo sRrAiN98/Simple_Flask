@@ -1,0 +1,16 @@
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+    targetRevision: main
+    path: Helm_Charts/AppOfApp_Version2/templates/app
+  destination:
+    namespace: test
+    server: https://kubernetes.default.svc
+apps:
+  - name: testapp1
+    valueFiles: values.yaml
+  - name: testapp2
+    valueFiles: values-app2.yaml
+  - name: testapp3
+    valueFiles: values-app3.yaml

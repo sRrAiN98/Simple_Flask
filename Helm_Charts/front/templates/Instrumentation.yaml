@@ -1,0 +1,24 @@
+{{- if .Values.instrumentation.enabled }}
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: python-instrumentation
+spec:
+  exporter:
+    endpoint:  {{ .Values.instrumentation.exporter.endpoint }}
+  {{- with .Values.instrumentation.propagators }}
+  propagators:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.instrumentation.sampler }}
+  sampler:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  python:
+    env:
+    {{- range $key, $val := .Values.instrumentation.python.env }}
+      - name: {{ $key }}
+        value: {{ $val | quote }}
+    {{- end }}
+{{- end }}
+

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSA Example</title>
+</head>
+<body>
+    <h1>MSA Example</h1>
+    
+    <label for="value2">Service 2 Value:</label>
+    <input type="text" id="value2" placeholder="Enter new value for Service 2" value="app2로 가는 길">
+    
+    <label for="value3">Service 3 Value:</label>
+    <input type="text" id="value3" placeholder="Enter new value for Service 3" value="app3로 가는 길">
+    
+    <button onclick="updateServices()">Update Services</button>
+
+    <h2>Service 2 Current Value: <span id="service2Value">Initial Value 2</span></h2>
+    <h2>Service 3 Current Value: <span id="service3Value">Initial Value 3</span></h2>
+
+    <script>
+        function updateServices() {
+            const value2 = document.getElementById('value2').value;
+            const value3 = document.getElementById('value3').value;
+            
+            fetch(`/update_service2/${value2}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('service2Value').innerText = value2;
+                });
+                
+            fetch(`/update_service3/${value3}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('service3Value').innerText = value3;
+                });
+        }
+    </script>
+</body>
+</html>
