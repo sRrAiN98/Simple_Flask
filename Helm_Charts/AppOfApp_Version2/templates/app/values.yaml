@@ -110,7 +110,7 @@ resources:
   #   memory: 1024Mi
   requests:
     cpu: 1m
-    memory: "150Mi"
+    memory: "60Mi"
 
 autoscaling:
   enabled: true
