@@ -72,14 +72,12 @@ gateway:
         protocol: HTTP
       # tls:
       #   httpsRedirect: true
-      hosts:
+      hosts: 
         - "*.srrain.store"
     - port:
         number: 443
         name: https
         protocol: HTTPS
-      hosts:
-        - "*.srrain.store"
       tls:
         mode: SIMPLE
         credentialName: app1-tls-secret

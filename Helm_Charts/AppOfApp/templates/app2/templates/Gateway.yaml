@@ -12,6 +12,10 @@ spec:
         number: {{ .port.number }}
         name: {{ .port.name }}
         protocol: {{ .port.protocol }}
+      hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
       {{- if .tls }}
       tls:
         {{- if .tls.httpsRedirect }}
@@ -24,9 +28,5 @@ spec:
         credentialName: {{ .tls.credentialName }}
         {{- end }}
       {{- end }}
-      hosts:
-        {{- range .hosts }}
-        - {{ . | quote  }}
-        {{- end }}
     {{- end }}
 {{- end }}
