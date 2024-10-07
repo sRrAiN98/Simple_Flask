@@ -12,8 +12,8 @@ spec:
         number: {{ .port.number }}
         name: {{ .port.name }}
         protocol: {{ .port.protocol }}
-      hosts:
         {{- range .hosts }}
+      hosts:
         - {{ . | quote }}
         {{- end }}
       {{- if .tls }}

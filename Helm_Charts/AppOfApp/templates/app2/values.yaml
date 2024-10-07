@@ -72,7 +72,7 @@ gateway:
         protocol: HTTP
       # tls:
       #   httpsRedirect: true
-      hosts: 
+      hosts:
         - "*.srrain.store"
     - port:
         number: 443
