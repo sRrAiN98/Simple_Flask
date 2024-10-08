@@ -13,6 +13,6 @@ spec:
           prefix: /
     route:
       - destination:
-          host: kube-prometheus-stack-grafana.monitoring.svc.cluster.local
+          host: kube-prometheus-stack-grafana.istio-system.svc.cluster.local
           port:
             number: 80
