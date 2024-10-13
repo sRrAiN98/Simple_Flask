@@ -44,20 +44,20 @@ service:
   port: 8080
 
 ingress:
-  enabled: false
+  enabled: true
   className: "nginx"
-  annotations: 
-    cert-manager.io/issuer: letsencrypt-prod
+  # annotations: 
+  #   cert-manager.io/issuer: letsencrypt-prod
   hosts:
     - host: back.srrain.store
       paths:
         - path: /
           pathType: ImplementationSpecific
           # serviceName: service
-  tls: 
-  - hosts:
-    - back.srrain.store
-    secretName: backend-tls
+  # tls: 
+  # - hosts:
+  #   - back.srrain.store
+  #   secretName: backend-tls
 
 
 # istio gateway
