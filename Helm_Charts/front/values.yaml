@@ -25,8 +25,8 @@ serviceAccount:
 
 podAnnotations:
   # instrumentation.opentelemetry.io/inject-java: "tracing/opentelemetry-kube-stack"
+  sidecar.istio.io/inject: "false" 
   sidecar.istio.io/proxyCPU: "10m"
-  # reloader.stakater.com/auto: "false"
 
 podSecurityContext: {}
   # fsGroup: 2000
