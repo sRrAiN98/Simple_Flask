@@ -4,7 +4,7 @@ metadata:
   name: argocd
 spec:
   hosts:
-  - "argocd.srrain.store"
+  - "*"
   gateways:
   - argocd-gateway
   http:
