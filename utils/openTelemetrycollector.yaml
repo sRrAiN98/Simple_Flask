@@ -1,12 +1,11 @@
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
-  name: otel
+  name: collector
 spec:
-  # mode: daemonset
   mode: deployment
   hostNetwork: true 
-  config: 
+  config: |
     receivers:
       otlp:
         protocols:
