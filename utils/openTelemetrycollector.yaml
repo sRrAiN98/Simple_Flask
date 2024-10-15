@@ -106,7 +106,7 @@ spec:
           insecure: true
 
       # logs
-      loki:
+      otlphttp/loki:
         endpoint: http://loki-distributed-gateway.logging.svc:80/loki/api/v1/push
         tls:
           insecure: true
@@ -137,7 +137,7 @@ spec:
         logs:
           receivers: [otlp]
           processors: [batch, memory_limiter, resource, resourcedetection/env]
-          exporters: [loki]
+          exporters: [otlphttp/loki]
         # metrics:
         #   receivers: [prometheus]
         #   processors: [batch]
