@@ -22,13 +22,20 @@ spec:
   java: {}
   python:
     env:
-      OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED: 'true'
-      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector.tracing.svc:4318'
-      OTEL_EXPORTER_OTLP_LOGS_PROTOCOL: http/protobuf
-      OTEL_EXPORTER_OTLP_TRACES_PROTOCOL: http/protobuf
-      OTEL_METRICS_EXPORTER: none      #404 not found 
-      OTEL_LOGS_EXPORTER: otlp_proto_http
-      OTEL_TRACES_EXPORTER: otlp       
+      - name: OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED
+        value: 'true'
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: 'http://otel-collector.tracing.svc:4318'
+      - name: OTEL_EXPORTER_OTLP_LOGS_PROTOCOL
+        value: http/protobuf
+      - name: OTEL_EXPORTER_OTLP_TRACES_PROTOCOL
+        value: http/protobuf
+      - name: OTEL_METRICS_EXPORTER
+        value: none
+      - name: OTEL_LOGS_EXPORTER
+        value: otlp_proto_http
+      - name: OTEL_TRACES_EXPORTER
+        value: otlp
   nodejs: {}
   dotnet: {}
   go: {}
