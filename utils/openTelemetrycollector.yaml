@@ -75,17 +75,15 @@ spec:
             from_attribute: "rpc.service"
             action: insert
 
-      span/custom:
-        name:
-          separator: "::"
-          from_attributes: [net.peer.name, rpc.service]
-
-      span/includeexclude:
-        name:
-          from_attributes: [net.peer.name, rpc.service]
-          to_attributes:
-            rules:
-              - "(?P<service>.*?)$"
+      transform:
+        trace_statements:
+          - context: span
+            statements:
+              - set(name, attributes["net.peer.name"]) where attributes["rpc.service"] != ""
+              - keep_keys(attributes, ["net.peer.name", "rpc.service"])
+          - context: resource
+            statements:
+              - set(attributes["service"], attributes["rpc.service"]) where attributes["rpc.service"] != ""
 
     exporters:
       debug:
@@ -108,8 +106,8 @@ spec:
         tls:
           insecure: true
       # metrics
-      prometheusremotewrite:
-        endpoint: http://kube-prometheus-stack-prometheus.istio-system.svc:9090/api/v1/write
+      otlphttp/prometheus:
+        endpoint: http://kube-prometheus-stack-prometheus.istio-system.svc:9090/api/v1/otlp
         tls:
           insecure: true
           insecure_skip_verify: true
@@ -122,7 +120,7 @@ spec:
         endpoint: 0.0.0.0:8889
 
     connectors:
-      spanmetrics:
+      spanmetrics: {}
 
     extensions:
       health_check:
@@ -145,7 +143,7 @@ spec:
         # metrics:
         #   receivers: [prometheus]
         #   processors: [batch]
-        #   exporters: [debug, prometheusremotewrite]
-        metrics/spanmetrics:
+        #   exporters: [debug, otlphttp/prometheus]
+        metrics:
           receivers: [spanmetrics]
-          exporters: [prometheusremotewrite]
+          exporters: [otlphttp/prometheus]
