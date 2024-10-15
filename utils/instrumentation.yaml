@@ -1,0 +1,36 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: Instrumentation
+spec:
+  exporter:
+    endpoint: http://otel-collector.tracing.svc:4317
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+    - b3multi
+    - jaeger
+    - xray
+    - ottrace
+
+  sampler:
+    type: parentbased_traceidratio
+    argument: "1"
+
+  env: {}
+  java: {}
+  python:
+    env:
+      OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED: 'true'
+      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector.tracing.svc:4318'
+      OTEL_EXPORTER_OTLP_LOGS_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_TRACES_PROTOCOL: http/protobuf
+      OTEL_METRICS_EXPORTER: none      #404 not found 
+      OTEL_LOGS_EXPORTER: otlp_proto_http
+      OTEL_TRACES_EXPORTER: otlp       
+  nodejs: {}
+  dotnet: {}
+  go: {}
+  apacheHtpd: {}
+  nginx: {}

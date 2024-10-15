@@ -1,0 +1,152 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel
+spec:
+  # mode: daemonset
+  mode: deployment
+  hostNetwork: true 
+  config: 
+    receivers:
+      otlp:
+        protocols:
+          grpc: # on port 4317
+          http: # on port 4318
+            cors:
+              allowed_origins:
+                - "*"
+              allowed_headers:
+                - "*"
+      # prometheus:
+      #   config:
+      #     scrape_configs:
+      #     - job_name: 'otel-collector'
+      #       scrape_interval: 10s
+      #       static_configs:
+      #       - targets: [ '0.0.0.0:8888' ]
+      #       metric_relabel_configs:
+      #       - action: labeldrop
+      #         regex: (id|name)
+      #         replacement: $$1
+      #       - action: labelmap
+      #         regex: label_(.+)
+      #         replacement: $$1
+
+    processors:
+      batch: 
+        timeout: 10s # Timeout for the batch processor
+        send_batch_size: 10000 # Size of the batches to send
+        send_batch_max_size: 11000
+
+      memory_limiter:
+        check_interval: 5s
+        limit_mib: 250 # soft lock
+        spike_limit_mib: 50 # soft add +hard lock
+
+      resource:
+        attributes:
+        - key: service.name
+          action: insert
+          from_attribute: service_name
+        - key: service_namespace
+          action: insert
+          from_attribute: service_namespace
+        - key: compose.service
+          action: insert
+          from_attribute: compose_service
+        - key: loki.resource.labels
+          action: insert
+          value: service_name, service_namespace, compose_service
+
+      resource/test1:
+        attributes:
+        - action: upsert
+          key: peer.service
+          from_attribute: net.peer.name
+        - action: upsert
+          key: peer.service
+          from_attribute: rpc.service	
+
+      attributes/insert:
+        actions:
+          - key: "peer.service"
+            from_attribute: "net.peer.name"
+            action: insert
+          - key: "peer.service"
+            from_attribute: "rpc.service"
+            action: insert
+
+      span/custom:
+        name:
+          separator: "::"
+          from_attributes: [net.peer.name, rpc.service]
+
+      span/includeexclude:
+        name:
+          from_attributes: [net.peer.name, rpc.service]
+          to_attributes:
+            rules:
+              - "(?P<service>.*?)$"
+
+    exporters:
+      debug:
+        verbosity: normal
+        # verbosity: detailed
+      # traces
+      otlp/tempo:
+        endpoint: http://tempo.tracing.svc:4317
+        tls:
+          insecure: true
+          #insecure_skip_verify: true]
+      otlp/jaeger:
+        endpoint: http://jaeger-collector.tracing.svc:4317
+        tls:
+          insecure: true
+
+      # logs
+      loki:
+        endpoint: http://loki-distributed-gateway.logging.svc:80/loki/api/v1/push
+        tls:
+          insecure: true
+      # metrics
+      prometheusremotewrite:
+        endpoint: http://kube-prometheus-stack-prometheus.istio-system.svc:9090/api/v1/write
+        tls:
+          insecure: true
+          insecure_skip_verify: true
+        remote_write_queue:
+          queue_size: 2000
+          num_consumers: 10
+        target_info:
+          enabled: true
+      prometheus:
+        endpoint: 0.0.0.0:8889
+
+    connectors:
+      spanmetrics:
+
+    extensions:
+      health_check:
+      pprof:
+        endpoint: 
+      zpages:
+        endpoint: 
+
+    service:
+      extensions: [health_check, pprof, zpages]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch, memory_limiter, resource/test1, attributes/insert]
+          exporters: [otlp/tempo, spanmetrics] #otlp/jaeger
+        logs:
+          receivers: [otlp]
+          processors: [batch, memory_limiter, resource]
+          exporters: [loki]
+        # metrics:
+        #   receivers: [prometheus]
+        #   processors: [batch]
+        #   exporters: [debug, prometheusremotewrite]
+        metrics/spanmetrics:
+          receivers: [spanmetrics]
+          exporters: [prometheusremotewrite]
