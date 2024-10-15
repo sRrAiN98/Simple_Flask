@@ -18,7 +18,6 @@ spec:
     type: parentbased_traceidratio
     argument: "1"
 
-  env: []
   java: {}
   python:
     env:
