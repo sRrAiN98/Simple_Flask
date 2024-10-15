@@ -42,6 +42,11 @@ spec:
         limit_mib: 250 # soft lock
         spike_limit_mib: 50 # soft add +hard lock
 
+      resourcedetection/env:
+        detectors: [env]
+        timeout: 2s
+        override: false
+
       resource:
         attributes:
         - key: service.name
@@ -134,11 +139,11 @@ spec:
       pipelines:
         traces:
           receivers: [otlp]
-          processors: [batch, memory_limiter, resource/test1, attributes/insert]
+          processors: [batch, memory_limiter, resource/test1, attributes/insert, resourcedetection/env]
           exporters: [otlp/tempo, spanmetrics] #otlp/jaeger
         logs:
           receivers: [otlp]
-          processors: [batch, memory_limiter, resource]
+          processors: [batch, memory_limiter, resource, resourcedetection/env]
           exporters: [loki]
         # metrics:
         #   receivers: [prometheus]
