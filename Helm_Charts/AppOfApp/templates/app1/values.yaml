@@ -24,7 +24,7 @@ serviceAccount:
   name: ""
 
 podAnnotations:
-  instrumentation.opentelemetry.io/inject-python: "tracing/opentelemetry-kube-stack"
+  instrumentation.opentelemetry.io/inject-python: "tracing/collector"
   sidecar.opentelemetry.io/inject: "true"
   sidecar.istio.io/proxyCPU: "10m"
   # reloader.stakater.com/auto: "false"
