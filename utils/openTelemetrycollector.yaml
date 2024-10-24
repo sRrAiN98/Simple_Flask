@@ -5,7 +5,7 @@ metadata:
 spec:
   mode: deployment
   hostNetwork: true 
-  config: 
+  config: |
     receivers:
       otlp:
         protocols:
