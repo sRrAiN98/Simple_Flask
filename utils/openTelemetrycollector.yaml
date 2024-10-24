@@ -5,7 +5,7 @@ metadata:
 spec:
   mode: deployment
   hostNetwork: true 
-  config: |
+  config: 
     receivers:
       otlp:
         protocols:
@@ -21,10 +21,16 @@ spec:
       debug:
         verbosity: normal
         # verbosity: detailed
-      otlp/jaeger:
-        endpoint: http://jaeger-collector.tracing.svc:4317
+      otlphttp/loki: # Loki CoreDNS입력
+        endpoint: http://loki-distributed-gateway.logging.svc:80/otlp
+        # endpoint: http://loki-distributed-gateway.logging.svc:80/loki/api/v1/push
         tls:
           insecure: true
+      otlphttp/prometheus:
+        endpoint: http://kube-prometheus-stack-prometheus.istio-system.svc:9090/api/v1/otlp
+        tls:
+          insecure: true
+          insecure_skip_verify: true
       otlp/tempo:
         endpoint: http://tempo.tracing.svc:4317
         tls:
@@ -89,18 +95,6 @@ spec:
           - context: resource
             statements:
               - set(attributes["service"], attributes["rpc.service"]) where attributes["rpc.service"] != ""
-
-      # logs
-      otlphttp/loki:
-        endpoint: http://loki-distributed-gateway.logging.svc:80/loki/api/v1/push
-        tls:
-          insecure: true
-      # metrics
-      otlphttp/prometheus:
-        endpoint: http://kube-prometheus-stack-prometheus.istio-system.svc:9090/api/v1/otlp
-        tls:
-          insecure: true
-          insecure_skip_verify: true
 
     connectors:
       spanmetrics: {}
