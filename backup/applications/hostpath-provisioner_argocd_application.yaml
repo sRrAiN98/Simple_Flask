@@ -1,0 +1,235 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-14T01:20:56Z"
+  generation: 255
+  name: hostpath-provisioner
+  namespace: argocd
+  resourceVersion: "461079"
+  uid: 70e333c9-2381-47f0-9235-3bad55521662
+spec:
+  destination:
+    namespace: utils
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: hostpath-provisioner
+    helm:
+      valueFiles:
+      - values.yaml
+    repoURL: https://charts.rimusz.net
+    targetRevision: 0.2.13
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
+status:
+  conditions:
+  - lastTransitionTime: "2024-10-14T13:33:02Z"
+    message: 'Failed to load target state: failed to generate manifest for source
+      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
+      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
+    type: ComparisonError
+  controllerNamespace: argocd
+  health:
+    status: Healthy
+  history:
+  - deployStartedAt: "2024-10-14T01:21:10Z"
+    deployedAt: "2024-10-14T01:21:16Z"
+    id: 0
+    initiatedBy:
+      automated: true
+    revision: 0.2.13
+    source:
+      chart: hostpath-provisioner
+      helm:
+        valueFiles:
+        - values.yaml
+      repoURL: https://charts.rimusz.net
+      targetRevision: 0.2.13
+  operationState:
+    finishedAt: "2024-10-14T01:21:16Z"
+    message: successfully synced (all tasks run)
+    operation:
+      initiatedBy:
+        automated: true
+      retry:
+        limit: 5
+      sync:
+        revision: 0.2.13
+        syncOptions:
+        - CreateNamespace=true
+    phase: Succeeded
+    startedAt: "2024-10-14T01:21:10Z"
+    syncResult:
+      resources:
+      - group: ""
+        hookPhase: Running
+        kind: ServiceAccount
+        message: serviceaccount/hostpath-provisioner created
+        name: hostpath-provisioner
+        namespace: utils
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: storage.k8s.io
+        hookPhase: Running
+        kind: StorageClass
+        message: storageclass.storage.k8s.io/hostpath created
+        name: hostpath
+        namespace: utils
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Running
+        kind: ClusterRole
+        message: "clusterrole.rbac.authorization.k8s.io/hostpath-provisioner reconciled.
+          reconciliation required create\n\tmissing rules added:\n\t\t{Verbs:[get
+          list watch create delete] APIGroups:[] Resources:[persistentvolumes] ResourceNames:[]
+          NonResourceURLs:[]}\n\t\t{Verbs:[get list watch] APIGroups:[] Resources:[persistentvolumeclaims]
+          ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[get list watch] APIGroups:[storage.k8s.io]
+          Resources:[storageclasses] ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[create
+          update patch] APIGroups:[] Resources:[events] ResourceNames:[] NonResourceURLs:[]}.
+          clusterrole.rbac.authorization.k8s.io/hostpath-provisioner configured. Warning:
+          resource clusterroles/hostpath-provisioner is missing the kubectl.kubernetes.io/last-applied-configuration
+          annotation which is required by  apply.  apply should only be used on resources
+          created declaratively by either  create --save-config or  apply. The missing
+          annotation will be patched automatically."
+        name: hostpath-provisioner
+        namespace: utils
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Running
+        kind: ClusterRoleBinding
+        message: "clusterrolebinding.rbac.authorization.k8s.io/hostpath-provisioner
+          reconciled. reconciliation required create\n\tmissing subjects added:\n\t\t{Kind:ServiceAccount
+          APIGroup: Name:hostpath-provisioner Namespace:utils}. clusterrolebinding.rbac.authorization.k8s.io/hostpath-provisioner
+          configured. Warning: resource clusterrolebindings/hostpath-provisioner is
+          missing the kubectl.kubernetes.io/last-applied-configuration annotation
+          which is required by  apply.  apply should only be used on resources created
+          declaratively by either  create --save-config or  apply. The missing annotation
+          will be patched automatically."
+        name: hostpath-provisioner
+        namespace: utils
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Running
+        kind: Role
+        message: "role.rbac.authorization.k8s.io/hostpath-provisioner-leader-locking
+          reconciled. reconciliation required create\n\tmissing rules added:\n\t\t{Verbs:[get
+          update patch] APIGroups:[] Resources:[endpoints] ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[list
+          watch create] APIGroups:[] Resources:[endpoints] ResourceNames:[] NonResourceURLs:[]}.
+          role.rbac.authorization.k8s.io/hostpath-provisioner-leader-locking configured.
+          Warning: resource roles/hostpath-provisioner-leader-locking is missing the
+          kubectl.kubernetes.io/last-applied-configuration annotation which is required
+          by  apply.  apply should only be used on resources created declaratively
+          by either  create --save-config or  apply. The missing annotation will be
+          patched automatically."
+        name: hostpath-provisioner-leader-locking
+        namespace: utils
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Running
+        kind: RoleBinding
+        message: "rolebinding.rbac.authorization.k8s.io/hostpath-provisioner-leader-locking
+          reconciled. reconciliation required create\n\tmissing subjects added:\n\t\t{Kind:ServiceAccount
+          APIGroup: Name:hostpath-provisioner Namespace:utils}. rolebinding.rbac.authorization.k8s.io/hostpath-provisioner-leader-locking
+          configured. Warning: resource rolebindings/hostpath-provisioner-leader-locking
+          is missing the kubectl.kubernetes.io/last-applied-configuration annotation
+          which is required by  apply.  apply should only be used on resources created
+          declaratively by either  create --save-config or  apply. The missing annotation
+          will be patched automatically."
+        name: hostpath-provisioner-leader-locking
+        namespace: utils
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apps
+        hookPhase: Running
+        kind: Deployment
+        message: deployment.apps/hostpath-provisioner created
+        name: hostpath-provisioner
+        namespace: utils
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      revision: 0.2.13
+      source:
+        chart: hostpath-provisioner
+        helm:
+          valueFiles:
+          - values.yaml
+        repoURL: https://charts.rimusz.net
+        targetRevision: 0.2.13
+  reconciledAt: "2024-10-14T13:48:02Z"
+  resources:
+  - kind: ServiceAccount
+    name: hostpath-provisioner
+    namespace: utils
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: apps
+    health:
+      status: Healthy
+    kind: Deployment
+    name: hostpath-provisioner
+    namespace: utils
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: hostpath-provisioner
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRoleBinding
+    name: hostpath-provisioner
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: Role
+    name: hostpath-provisioner-leader-locking
+    namespace: utils
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: RoleBinding
+    name: hostpath-provisioner-leader-locking
+    namespace: utils
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: storage.k8s.io
+    kind: StorageClass
+    name: hostpath
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  summary:
+    images:
+    - quay.io/rimusz/hostpath-provisioner:v0.2.5
+  sync:
+    comparedTo:
+      destination:
+        namespace: utils
+        server: https://kubernetes.default.svc
+      source:
+        chart: hostpath-provisioner
+        helm:
+          valueFiles:
+          - values.yaml
+        repoURL: https://charts.rimusz.net
+        targetRevision: 0.2.13
+    status: Unknown

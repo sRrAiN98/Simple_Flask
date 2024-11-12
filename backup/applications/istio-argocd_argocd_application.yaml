@@ -1,0 +1,258 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-12T15:22:46Z"
+  generation: 941
+  name: istio-argocd
+  namespace: argocd
+  resourceVersion: "461082"
+  uid: 73787902-d691-45f0-93cb-1d1d81f32110
+spec:
+  destination:
+    namespace: istio-system
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: istio-argocd
+    repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+    targetRevision: main
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+status:
+  conditions:
+  - lastTransitionTime: "2024-10-14T13:27:02Z"
+    message: 'Failed to load target state: failed to generate manifest for source
+      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
+      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
+    type: ComparisonError
+  controllerNamespace: argocd
+  health:
+    status: Healthy
+  history:
+  - deployStartedAt: "2024-10-12T15:22:47Z"
+    deployedAt: "2024-10-12T15:23:00Z"
+    id: 0
+    initiatedBy:
+      automated: true
+    revision: f866bc9934a834a645c39117dd4da34bbb1f3e17
+    source:
+      path: istio-argocd
+      repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+      targetRevision: main
+  operationState:
+    finishedAt: "2024-10-12T15:23:00Z"
+    message: successfully synced (all tasks run)
+    operation:
+      initiatedBy:
+        automated: true
+      retry:
+        limit: 5
+      sync:
+        revision: f866bc9934a834a645c39117dd4da34bbb1f3e17
+        syncOptions:
+        - CreateNamespace=true
+    phase: Succeeded
+    startedAt: "2024-10-12T15:22:47Z"
+    syncResult:
+      resources:
+      - group: networking.istio.io
+        hookPhase: Running
+        kind: VirtualService
+        message: virtualservice.networking.istio.io/argocd created
+        name: argocd
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1alpha3
+      - group: networking.istio.io
+        hookPhase: Running
+        kind: Gateway
+        message: gateway.networking.istio.io/argocd-gateway created
+        name: argocd-gateway
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1alpha3
+      - group: cert-manager.io
+        hookPhase: Running
+        kind: Certificate
+        message: certificate.cert-manager.io/argocd-tls created
+        name: argocd-tls
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: networking.istio.io
+        hookPhase: Running
+        kind: VirtualService
+        message: virtualservice.networking.istio.io/grafana created
+        name: grafana
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1alpha3
+      - group: networking.istio.io
+        hookPhase: Running
+        kind: Gateway
+        message: gateway.networking.istio.io/grafana-gateway created
+        name: grafana-gateway
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1alpha3
+      - group: cert-manager.io
+        hookPhase: Running
+        kind: Certificate
+        message: certificate.cert-manager.io/grafana-tls created
+        name: grafana-tls
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: networking.istio.io
+        hookPhase: Running
+        kind: EnvoyFilter
+        message: envoyfilter.networking.istio.io/ingressgateway-settings created
+        name: ingressgateway-settings
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1alpha3
+      - group: networking.istio.io
+        hookPhase: Running
+        kind: DestinationRule
+        message: destinationrule.networking.istio.io/kiali created
+        name: kiali
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1alpha3
+      - group: networking.istio.io
+        hookPhase: Running
+        kind: Gateway
+        message: gateway.networking.istio.io/kiali-gateway created
+        name: kiali-gateway
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1alpha3
+      - group: networking.istio.io
+        hookPhase: Running
+        kind: VirtualService
+        message: virtualservice.networking.istio.io/kiali-vs created
+        name: kiali-vs
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1alpha3
+      - group: cert-manager.io
+        hookPhase: Running
+        kind: ClusterIssuer
+        message: clusterissuer.cert-manager.io/letsencrypt-prod-istio created
+        name: letsencrypt-prod-istio
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: cert-manager.io
+        hookPhase: Running
+        kind: ClusterIssuer
+        message: clusterissuer.cert-manager.io/letsencrypt-staging-istio created
+        name: letsencrypt-staging-istio
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      revision: f866bc9934a834a645c39117dd4da34bbb1f3e17
+      source:
+        path: istio-argocd
+        repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+        targetRevision: main
+  reconciledAt: "2024-10-14T13:48:02Z"
+  resources:
+  - group: cert-manager.io
+    health:
+      message: The ACME account was registered with the ACME server
+      status: Healthy
+    kind: ClusterIssuer
+    name: letsencrypt-prod-istio
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: cert-manager.io
+    health:
+      message: The ACME account was registered with the ACME server
+      status: Healthy
+    kind: ClusterIssuer
+    name: letsencrypt-staging-istio
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: networking.istio.io
+    kind: DestinationRule
+    name: kiali
+    namespace: istio-system
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: networking.istio.io
+    kind: EnvoyFilter
+    name: ingressgateway-settings
+    namespace: istio-system
+    requiresPruning: true
+    status: Unknown
+    version: v1alpha3
+  - group: networking.istio.io
+    kind: Gateway
+    name: argocd-gateway
+    namespace: istio-system
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: networking.istio.io
+    kind: Gateway
+    name: grafana-gateway
+    namespace: istio-system
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: networking.istio.io
+    kind: Gateway
+    name: kiali-gateway
+    namespace: istio-system
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: networking.istio.io
+    kind: VirtualService
+    name: argocd
+    namespace: istio-system
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: networking.istio.io
+    kind: VirtualService
+    name: grafana
+    namespace: istio-system
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: networking.istio.io
+    kind: VirtualService
+    name: kiali-vs
+    namespace: istio-system
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  summary: {}
+  sync:
+    comparedTo:
+      destination:
+        namespace: istio-system
+        server: https://kubernetes.default.svc
+      source:
+        path: istio-argocd
+        repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+        targetRevision: main
+    status: Unknown

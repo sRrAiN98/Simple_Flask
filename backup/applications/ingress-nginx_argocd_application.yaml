@@ -1,0 +1,433 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-13T03:24:02Z"
+  generation: 721
+  name: ingress-nginx
+  namespace: argocd
+  resourceVersion: "461084"
+  uid: 8cc81ac5-79e4-46b5-8c7e-69c4a6a6fa8d
+spec:
+  destination:
+    namespace: ingress-nginx
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: ingress-nginx
+    helm:
+      valueFiles:
+      - values.yaml
+    repoURL: https://kubernetes.github.io/ingress-nginx
+    targetRevision: 4.11.3
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
+status:
+  conditions:
+  - lastTransitionTime: "2024-10-14T13:33:02Z"
+    message: 'Failed to load target state: failed to generate manifest for source
+      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
+      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
+    type: ComparisonError
+  controllerNamespace: argocd
+  health:
+    status: Healthy
+  history:
+  - deployStartedAt: "2024-10-13T03:24:03Z"
+    deployedAt: "2024-10-13T03:25:42Z"
+    id: 0
+    initiatedBy:
+      automated: true
+    revision: 4.11.3
+    source:
+      chart: ingress-nginx
+      helm:
+        valueFiles:
+        - values.yaml
+      repoURL: https://kubernetes.github.io/ingress-nginx
+      targetRevision: 4.11.3
+  operationState:
+    finishedAt: "2024-10-13T03:25:42Z"
+    message: successfully synced (no more tasks)
+    operation:
+      initiatedBy:
+        automated: true
+      retry:
+        limit: 5
+      sync:
+        revision: 4.11.3
+        syncOptions:
+        - CreateNamespace=true
+    phase: Succeeded
+    startedAt: "2024-10-13T03:24:03Z"
+    syncResult:
+      resources:
+      - group: ""
+        hookPhase: Running
+        kind: Namespace
+        message: namespace/ingress-nginx created
+        name: ingress-nginx
+        namespace: ""
+        status: Synced
+        syncPhase: PreSync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        hookType: PreSync
+        kind: ServiceAccount
+        message: ingress-nginx-admission created
+        name: ingress-nginx-admission
+        namespace: ingress-nginx
+        syncPhase: PreSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PreSync
+        kind: ClusterRole
+        message: ingress-nginx-admission created
+        name: ingress-nginx-admission
+        namespace: ingress-nginx
+        syncPhase: PreSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PreSync
+        kind: ClusterRoleBinding
+        message: ingress-nginx-admission created
+        name: ingress-nginx-admission
+        namespace: ingress-nginx
+        syncPhase: PreSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PreSync
+        kind: Role
+        message: ingress-nginx-admission created
+        name: ingress-nginx-admission
+        namespace: ingress-nginx
+        syncPhase: PreSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PreSync
+        kind: RoleBinding
+        message: ingress-nginx-admission created
+        name: ingress-nginx-admission
+        namespace: ingress-nginx
+        syncPhase: PreSync
+        version: v1
+      - group: batch
+        hookPhase: Succeeded
+        hookType: PreSync
+        kind: Job
+        message: job.batch/ingress-nginx-admission-create created
+        name: ingress-nginx-admission-create
+        namespace: ingress-nginx
+        syncPhase: PreSync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ServiceAccount
+        message: serviceaccount/ingress-nginx created
+        name: ingress-nginx
+        namespace: ingress-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/ingress-nginx-controller created
+        name: ingress-nginx-controller
+        namespace: ingress-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        kind: ClusterRole
+        message: "clusterrole.rbac.authorization.k8s.io/ingress-nginx reconciled.
+          reconciliation required create\n\tmissing rules added:\n\t\t{Verbs:[list
+          watch] APIGroups:[] Resources:[configmaps endpoints nodes pods secrets namespaces]
+          ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[list watch] APIGroups:[coordination.k8s.io]
+          Resources:[leases] ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[get]
+          APIGroups:[] Resources:[nodes] ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[get
+          list watch] APIGroups:[] Resources:[services] ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[get
+          list watch] APIGroups:[networking.k8s.io] Resources:[ingresses] ResourceNames:[]
+          NonResourceURLs:[]}\n\t\t{Verbs:[create patch] APIGroups:[] Resources:[events]
+          ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[update] APIGroups:[networking.k8s.io]
+          Resources:[ingresses/status] ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[get
+          list watch] APIGroups:[networking.k8s.io] Resources:[ingressclasses] ResourceNames:[]
+          NonResourceURLs:[]}\n\t\t{Verbs:[list watch get] APIGroups:[discovery.k8s.io]
+          Resources:[endpointslices] ResourceNames:[] NonResourceURLs:[]}. clusterrole.rbac.authorization.k8s.io/ingress-nginx
+          configured. Warning: resource clusterroles/ingress-nginx is missing the
+          kubectl.kubernetes.io/last-applied-configuration annotation which is required
+          by  apply.  apply should only be used on resources created declaratively
+          by either  create --save-config or  apply. The missing annotation will be
+          patched automatically."
+        name: ingress-nginx
+        namespace: ingress-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        kind: ClusterRoleBinding
+        message: "clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx reconciled.
+          reconciliation required create\n\tmissing subjects added:\n\t\t{Kind:ServiceAccount
+          APIGroup: Name:ingress-nginx Namespace:ingress-nginx}. clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx
+          configured. Warning: resource clusterrolebindings/ingress-nginx is missing
+          the kubectl.kubernetes.io/last-applied-configuration annotation which is
+          required by  apply.  apply should only be used on resources created declaratively
+          by either  create --save-config or  apply. The missing annotation will be
+          patched automatically."
+        name: ingress-nginx
+        namespace: ingress-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        kind: Role
+        message: "role.rbac.authorization.k8s.io/ingress-nginx reconciled. reconciliation
+          required create\n\tmissing rules added:\n\t\t{Verbs:[get] APIGroups:[] Resources:[namespaces]
+          ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[get list watch] APIGroups:[]
+          Resources:[configmaps pods secrets endpoints] ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[get
+          list watch] APIGroups:[] Resources:[services] ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[get
+          list watch] APIGroups:[networking.k8s.io] Resources:[ingresses] ResourceNames:[]
+          NonResourceURLs:[]}\n\t\t{Verbs:[update] APIGroups:[networking.k8s.io] Resources:[ingresses/status]
+          ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[get list watch] APIGroups:[networking.k8s.io]
+          Resources:[ingressclasses] ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[get
+          update] APIGroups:[coordination.k8s.io] Resources:[leases] ResourceNames:[ingress-nginx-leader]
+          NonResourceURLs:[]}\n\t\t{Verbs:[create] APIGroups:[coordination.k8s.io]
+          Resources:[leases] ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[create
+          patch] APIGroups:[] Resources:[events] ResourceNames:[] NonResourceURLs:[]}\n\t\t{Verbs:[list
+          watch get] APIGroups:[discovery.k8s.io] Resources:[endpointslices] ResourceNames:[]
+          NonResourceURLs:[]}. role.rbac.authorization.k8s.io/ingress-nginx configured.
+          Warning: resource roles/ingress-nginx is missing the kubectl.kubernetes.io/last-applied-configuration
+          annotation which is required by  apply.  apply should only be used on resources
+          created declaratively by either  create --save-config or  apply. The missing
+          annotation will be patched automatically."
+        name: ingress-nginx
+        namespace: ingress-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        kind: RoleBinding
+        message: "rolebinding.rbac.authorization.k8s.io/ingress-nginx reconciled.
+          reconciliation required create\n\tmissing subjects added:\n\t\t{Kind:ServiceAccount
+          APIGroup: Name:ingress-nginx Namespace:ingress-nginx}. rolebinding.rbac.authorization.k8s.io/ingress-nginx
+          configured. Warning: resource rolebindings/ingress-nginx is missing the
+          kubectl.kubernetes.io/last-applied-configuration annotation which is required
+          by  apply.  apply should only be used on resources created declaratively
+          by either  create --save-config or  apply. The missing annotation will be
+          patched automatically."
+        name: ingress-nginx
+        namespace: ingress-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Service
+        message: service/ingress-nginx-controller-admission created
+        name: ingress-nginx-controller-admission
+        namespace: ingress-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Service
+        message: service/ingress-nginx-controller created
+        name: ingress-nginx-controller
+        namespace: ingress-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apps
+        hookPhase: Succeeded
+        kind: Deployment
+        message: deployment.apps/ingress-nginx-controller created
+        name: ingress-nginx-controller
+        namespace: ingress-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: networking.k8s.io
+        hookPhase: Succeeded
+        kind: IngressClass
+        message: ingressclass.networking.k8s.io/nginx created
+        name: nginx
+        namespace: ingress-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: admissionregistration.k8s.io
+        hookPhase: Succeeded
+        kind: ValidatingWebhookConfiguration
+        message: validatingwebhookconfiguration.admissionregistration.k8s.io/ingress-nginx-admission
+          created
+        name: ingress-nginx-admission
+        namespace: ingress-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        hookType: PostSync
+        kind: ServiceAccount
+        message: ingress-nginx-admission created
+        name: ingress-nginx-admission
+        namespace: ingress-nginx
+        syncPhase: PostSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PostSync
+        kind: ClusterRole
+        message: ingress-nginx-admission created
+        name: ingress-nginx-admission
+        namespace: ingress-nginx
+        syncPhase: PostSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PostSync
+        kind: ClusterRoleBinding
+        message: ingress-nginx-admission created
+        name: ingress-nginx-admission
+        namespace: ingress-nginx
+        syncPhase: PostSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PostSync
+        kind: Role
+        message: ingress-nginx-admission created
+        name: ingress-nginx-admission
+        namespace: ingress-nginx
+        syncPhase: PostSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PostSync
+        kind: RoleBinding
+        message: ingress-nginx-admission created
+        name: ingress-nginx-admission
+        namespace: ingress-nginx
+        syncPhase: PostSync
+        version: v1
+      - group: batch
+        hookPhase: Succeeded
+        hookType: PostSync
+        kind: Job
+        message: job.batch/ingress-nginx-admission-patch created
+        name: ingress-nginx-admission-patch
+        namespace: ingress-nginx
+        syncPhase: PostSync
+        version: v1
+      revision: 4.11.3
+      source:
+        chart: ingress-nginx
+        helm:
+          valueFiles:
+          - values.yaml
+        repoURL: https://kubernetes.github.io/ingress-nginx
+        targetRevision: 4.11.3
+  reconciledAt: "2024-10-14T13:48:02Z"
+  resources:
+  - kind: ConfigMap
+    name: ingress-nginx-controller
+    namespace: ingress-nginx
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: ingress-nginx-controller
+    namespace: ingress-nginx
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: ingress-nginx-controller-admission
+    namespace: ingress-nginx
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - kind: ServiceAccount
+    name: ingress-nginx
+    namespace: ingress-nginx
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: admissionregistration.k8s.io
+    kind: ValidatingWebhookConfiguration
+    name: ingress-nginx-admission
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: apps
+    health:
+      status: Healthy
+    kind: Deployment
+    name: ingress-nginx-controller
+    namespace: ingress-nginx
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: networking.k8s.io
+    kind: IngressClass
+    name: nginx
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: ingress-nginx
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRoleBinding
+    name: ingress-nginx
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: Role
+    name: ingress-nginx
+    namespace: ingress-nginx
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: RoleBinding
+    name: ingress-nginx
+    namespace: ingress-nginx
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  summary:
+    images:
+    - registry.k8s.io/ingress-nginx/controller:v1.11.3@sha256:d56f135b6462cfc476447cfe564b83a45e8bb7da2774963b00d12161112270b7
+  sync:
+    comparedTo:
+      destination:
+        namespace: ingress-nginx
+        server: https://kubernetes.default.svc
+      source:
+        chart: ingress-nginx
+        helm:
+          valueFiles:
+          - values.yaml
+        repoURL: https://kubernetes.github.io/ingress-nginx
+        targetRevision: 4.11.3
+    status: Unknown

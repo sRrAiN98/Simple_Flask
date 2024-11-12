@@ -1,0 +1,238 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-12T15:24:31Z"
+  generation: 944
+  name: backend
+  namespace: argocd
+  resourceVersion: "461081"
+  uid: e992c941-b088-43a1-9691-1061f731350c
+spec:
+  destination:
+    namespace: web
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    helm:
+      valueFiles:
+      - values.yaml
+    path: Helm_Charts/back
+    repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+    targetRevision: main
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
+status:
+  conditions:
+  - lastTransitionTime: "2024-10-14T13:27:02Z"
+    message: 'Failed to load target state: failed to generate manifest for source
+      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
+      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
+    type: ComparisonError
+  controllerNamespace: argocd
+  health:
+    status: Healthy
+  history:
+  - deployStartedAt: "2024-10-12T15:24:33Z"
+    deployedAt: "2024-10-12T15:24:44Z"
+    id: 0
+    initiatedBy:
+      automated: true
+    revision: f866bc9934a834a645c39117dd4da34bbb1f3e17
+    source:
+      helm:
+        valueFiles:
+        - values.yaml
+      path: Helm_Charts/back
+      repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+      targetRevision: main
+  - deployStartedAt: "2024-10-13T13:19:36Z"
+    deployedAt: "2024-10-13T13:19:37Z"
+    id: 1
+    initiatedBy:
+      automated: true
+    revision: a6724813bedc36593ba331059ce22c4587d0929f
+    source:
+      helm:
+        valueFiles:
+        - values.yaml
+      path: Helm_Charts/back
+      repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+      targetRevision: main
+  - deployStartedAt: "2024-10-13T13:50:46Z"
+    deployedAt: "2024-10-13T13:50:50Z"
+    id: 2
+    initiatedBy:
+      automated: true
+    revision: 112d8016d82e5a036942a339ed4750b8f7868249
+    source:
+      helm:
+        valueFiles:
+        - values.yaml
+      path: Helm_Charts/back
+      repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+      targetRevision: main
+  operationState:
+    finishedAt: "2024-10-13T13:50:50Z"
+    message: successfully synced (all tasks run)
+    operation:
+      initiatedBy:
+        automated: true
+      retry:
+        limit: 5
+      sync:
+        revision: 112d8016d82e5a036942a339ed4750b8f7868249
+        syncOptions:
+        - CreateNamespace=true
+    phase: Succeeded
+    startedAt: "2024-10-13T13:50:46Z"
+    syncResult:
+      resources:
+      - group: policy
+        hookPhase: Running
+        kind: PodDisruptionBudget
+        message: poddisruptionbudget.policy/backend configured
+        name: backend
+        namespace: web
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Running
+        kind: ServiceAccount
+        message: serviceaccount/backend unchanged
+        name: backend
+        namespace: web
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Running
+        kind: Service
+        message: service/backend configured
+        name: backend
+        namespace: web
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apps
+        hookPhase: Running
+        kind: Deployment
+        message: deployment.apps/backend configured
+        name: backend
+        namespace: web
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: autoscaling
+        hookPhase: Running
+        kind: HorizontalPodAutoscaler
+        message: horizontalpodautoscaler.autoscaling/backend unchanged
+        name: backend
+        namespace: web
+        status: Synced
+        syncPhase: Sync
+        version: v2
+      - group: networking.k8s.io
+        hookPhase: Running
+        kind: Ingress
+        message: ingress.networking.k8s.io/backend unchanged
+        name: backend
+        namespace: web
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: networking.istio.io
+        hookPhase: Running
+        kind: VirtualService
+        message: virtualservice.networking.istio.io/backend unchanged
+        name: backend
+        namespace: web
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      revision: 112d8016d82e5a036942a339ed4750b8f7868249
+      source:
+        helm:
+          valueFiles:
+          - values.yaml
+        path: Helm_Charts/back
+        repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+        targetRevision: main
+  reconciledAt: "2024-10-14T13:48:02Z"
+  resources:
+  - health:
+      status: Healthy
+    kind: Service
+    name: backend
+    namespace: web
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - kind: ServiceAccount
+    name: backend
+    namespace: web
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: apps
+    health:
+      status: Healthy
+    kind: Deployment
+    name: backend
+    namespace: web
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: autoscaling
+    health:
+      message: the HPA controller was able to get the target's current scale
+      status: Healthy
+    kind: HorizontalPodAutoscaler
+    name: backend
+    namespace: web
+    requiresPruning: true
+    status: Unknown
+    version: v2
+  - group: networking.istio.io
+    kind: VirtualService
+    name: backend
+    namespace: web
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: networking.k8s.io
+    health:
+      status: Healthy
+    kind: Ingress
+    name: backend
+    namespace: web
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: policy
+    kind: PodDisruptionBudget
+    name: backend
+    namespace: web
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  summary:
+    externalURLs:
+    - http://back.srrain.store/
+    images:
+    - choi32739/todolist:backend
+  sync:
+    comparedTo:
+      destination:
+        namespace: web
+        server: https://kubernetes.default.svc
+      source:
+        helm:
+          valueFiles:
+          - values.yaml
+        path: Helm_Charts/back
+        repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+        targetRevision: main
+    status: Unknown

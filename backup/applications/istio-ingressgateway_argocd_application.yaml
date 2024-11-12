@@ -1,0 +1,206 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-13T13:55:23Z"
+  generation: 478
+  name: istio-ingressgateway
+  namespace: argocd
+  resourceVersion: "461100"
+  uid: 72a4799d-9982-423d-82fa-3e37ecae3b71
+spec:
+  destination:
+    namespace: istio-system
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: gateway
+    helm:
+      valueFiles:
+      - values.yaml
+    repoURL: https://istio-release.storage.googleapis.com/charts
+    targetRevision: 1.23.2
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
+status:
+  conditions:
+  - lastTransitionTime: "2024-10-14T13:33:02Z"
+    message: 'Failed to load target state: failed to generate manifest for source
+      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
+      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
+    type: ComparisonError
+  controllerNamespace: argocd
+  health:
+    status: Healthy
+  history:
+  - deployStartedAt: "2024-10-13T13:55:24Z"
+    deployedAt: "2024-10-13T13:55:26Z"
+    id: 0
+    initiatedBy:
+      automated: true
+    revision: 1.23.2
+    source:
+      chart: gateway
+      helm:
+        valueFiles:
+        - values.yaml
+      repoURL: https://istio-release.storage.googleapis.com/charts
+      targetRevision: 1.23.2
+  operationState:
+    finishedAt: "2024-10-13T13:55:27Z"
+    message: successfully synced (all tasks run)
+    operation:
+      initiatedBy:
+        automated: true
+      retry:
+        limit: 5
+      sync:
+        revision: 1.23.2
+        syncOptions:
+        - CreateNamespace=true
+    phase: Succeeded
+    startedAt: "2024-10-13T13:55:24Z"
+    syncResult:
+      resources:
+      - group: ""
+        hookPhase: Running
+        kind: ServiceAccount
+        message: serviceaccount/istio-ingressgateway created
+        name: istio-ingressgateway
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Running
+        kind: Role
+        message: "role.rbac.authorization.k8s.io/istio-ingressgateway reconciled.
+          reconciliation required create\n\tmissing rules added:\n\t\t{Verbs:[get
+          watch list] APIGroups:[] Resources:[secrets] ResourceNames:[] NonResourceURLs:[]}.
+          role.rbac.authorization.k8s.io/istio-ingressgateway configured. Warning:
+          resource roles/istio-ingressgateway is missing the kubectl.kubernetes.io/last-applied-configuration
+          annotation which is required by  apply.  apply should only be used on resources
+          created declaratively by either  create --save-config or  apply. The missing
+          annotation will be patched automatically."
+        name: istio-ingressgateway
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Running
+        kind: RoleBinding
+        message: "rolebinding.rbac.authorization.k8s.io/istio-ingressgateway reconciled.
+          reconciliation required create\n\tmissing subjects added:\n\t\t{Kind:ServiceAccount
+          APIGroup: Name:istio-ingressgateway Namespace:}. rolebinding.rbac.authorization.k8s.io/istio-ingressgateway
+          configured. Warning: resource rolebindings/istio-ingressgateway is missing
+          the kubectl.kubernetes.io/last-applied-configuration annotation which is
+          required by  apply.  apply should only be used on resources created declaratively
+          by either  create --save-config or  apply. The missing annotation will be
+          patched automatically."
+        name: istio-ingressgateway
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Running
+        kind: Service
+        message: service/istio-ingressgateway created
+        name: istio-ingressgateway
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apps
+        hookPhase: Running
+        kind: Deployment
+        message: deployment.apps/istio-ingressgateway created
+        name: istio-ingressgateway
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: autoscaling
+        hookPhase: Running
+        kind: HorizontalPodAutoscaler
+        message: horizontalpodautoscaler.autoscaling/istio-ingressgateway created
+        name: istio-ingressgateway
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v2
+      revision: 1.23.2
+      source:
+        chart: gateway
+        helm:
+          valueFiles:
+          - values.yaml
+        repoURL: https://istio-release.storage.googleapis.com/charts
+        targetRevision: 1.23.2
+  reconciledAt: "2024-10-14T13:48:02Z"
+  resources:
+  - health:
+      status: Healthy
+    kind: Service
+    name: istio-ingressgateway
+    namespace: istio-system
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - kind: ServiceAccount
+    name: istio-ingressgateway
+    namespace: istio-system
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: apps
+    health:
+      status: Healthy
+    kind: Deployment
+    name: istio-ingressgateway
+    namespace: istio-system
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: autoscaling
+    health:
+      message: the HPA controller was able to get the target's current scale
+      status: Healthy
+    kind: HorizontalPodAutoscaler
+    name: istio-ingressgateway
+    namespace: istio-system
+    requiresPruning: true
+    status: Unknown
+    version: v2
+  - group: rbac.authorization.k8s.io
+    kind: Role
+    name: istio-ingressgateway
+    namespace: istio-system
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: RoleBinding
+    name: istio-ingressgateway
+    namespace: istio-system
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  summary:
+    images:
+    - docker.io/istio/proxyv2:1.23.2
+  sync:
+    comparedTo:
+      destination:
+        namespace: istio-system
+        server: https://kubernetes.default.svc
+      source:
+        chart: gateway
+        helm:
+          valueFiles:
+          - values.yaml
+        repoURL: https://istio-release.storage.googleapis.com/charts
+        targetRevision: 1.23.2
+    status: Unknown

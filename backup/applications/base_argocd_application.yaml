@@ -1,0 +1,260 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-12T15:05:39Z"
+  generation: 929
+  name: base
+  namespace: argocd
+  resourceVersion: "461077"
+  uid: 9f1df362-a771-42f8-9c5f-88809bb4836e
+spec:
+  destination:
+    namespace: istio-system
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: base
+    helm:
+      valueFiles:
+      - values.yaml
+    repoURL: https://istio-release.storage.googleapis.com/charts
+    targetRevision: 1.23.2
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
+status:
+  conditions:
+  - lastTransitionTime: "2024-10-14T13:33:02Z"
+    message: 'Failed to load target state: failed to generate manifest for source
+      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
+      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
+    type: ComparisonError
+  controllerNamespace: argocd
+  health:
+    status: Healthy
+  history:
+  - deployStartedAt: "2024-10-12T15:07:01Z"
+    deployedAt: "2024-10-12T15:07:08Z"
+    id: 0
+    initiatedBy:
+      automated: true
+    revision: 1.23.2
+    source:
+      chart: base
+      helm:
+        valueFiles:
+        - values.yaml
+      repoURL: https://istio-release.storage.googleapis.com/charts
+      targetRevision: 1.23.2
+  operationState:
+    finishedAt: "2024-10-12T15:07:09Z"
+    message: successfully synced (all tasks run)
+    operation:
+      initiatedBy:
+        automated: true
+      retry:
+        limit: 5
+      sync:
+        revision: 1.23.2
+        syncOptions:
+        - CreateNamespace=true
+    phase: Succeeded
+    startedAt: "2024-10-12T15:07:01Z"
+    syncResult:
+      resources:
+      - group: ""
+        hookPhase: Running
+        kind: ServiceAccount
+        message: serviceaccount/istio-reader-service-account created
+        name: istio-reader-service-account
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Running
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/wasmplugins.extensions.istio.io
+          created
+        name: wasmplugins.extensions.istio.io
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Running
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/proxyconfigs.networking.istio.io
+          created
+        name: proxyconfigs.networking.istio.io
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Running
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/envoyfilters.networking.istio.io
+          created
+        name: envoyfilters.networking.istio.io
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Running
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/peerauthentications.security.istio.io
+          created
+        name: peerauthentications.security.istio.io
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Running
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/serviceentries.networking.istio.io
+          created
+        name: serviceentries.networking.istio.io
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Running
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/gateways.networking.istio.io
+          created
+        name: gateways.networking.istio.io
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Running
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/workloadgroups.networking.istio.io
+          created
+        name: workloadgroups.networking.istio.io
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Running
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/workloadentries.networking.istio.io
+          created
+        name: workloadentries.networking.istio.io
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Running
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/requestauthentications.security.istio.io
+          created
+        name: requestauthentications.security.istio.io
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Running
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/authorizationpolicies.security.istio.io
+          created
+        name: authorizationpolicies.security.istio.io
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Running
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/telemetries.telemetry.istio.io
+          created
+        name: telemetries.telemetry.istio.io
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Running
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/sidecars.networking.istio.io
+          created
+        name: sidecars.networking.istio.io
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Running
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/virtualservices.networking.istio.io
+          created
+        name: virtualservices.networking.istio.io
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Running
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/destinationrules.networking.istio.io
+          created
+        name: destinationrules.networking.istio.io
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: admissionregistration.k8s.io
+        hookPhase: Running
+        kind: ValidatingWebhookConfiguration
+        message: validatingwebhookconfiguration.admissionregistration.k8s.io/istiod-default-validator
+          created
+        name: istiod-default-validator
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      revision: 1.23.2
+      source:
+        chart: base
+        helm:
+          valueFiles:
+          - values.yaml
+        repoURL: https://istio-release.storage.googleapis.com/charts
+        targetRevision: 1.23.2
+  reconciledAt: "2024-10-14T13:48:02Z"
+  resources:
+  - kind: ServiceAccount
+    name: istio-reader-service-account
+    namespace: istio-system
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  - group: admissionregistration.k8s.io
+    kind: ValidatingWebhookConfiguration
+    name: istiod-default-validator
+    requiresPruning: true
+    status: Unknown
+    version: v1
+  summary: {}
+  sync:
+    comparedTo:
+      destination:
+        namespace: istio-system
+        server: https://kubernetes.default.svc
+      source:
+        chart: base
+        helm:
+          valueFiles:
+          - values.yaml
+        repoURL: https://istio-release.storage.googleapis.com/charts
+        targetRevision: 1.23.2
+    status: Unknown

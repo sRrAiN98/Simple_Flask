@@ -1,0 +1,29 @@
+apiVersion: v1
+data:
+  policy.csv: |
+    p, role:admin, exec, create, */*, allow
+    p, role:viewer, projects, get, *, allow
+    p, role:viewer, applications, sync, */*, allow
+    p, role:viewer, applications, get, */*, allow
+    g, viewer, role:viewer
+  policy.default: ""
+  policy.matchMode: glob
+  scopes: '[groups]'
+kind: ConfigMap
+metadata:
+  annotations:
+    meta.helm.sh/release-name: argocd
+    meta.helm.sh/release-namespace: argocd
+  creationTimestamp: "2024-10-12T14:44:18Z"
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/instance: argocd
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: argocd-rbac-cm
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/version: v2.12.4
+    helm.sh/chart: argo-cd-7.6.8
+  name: argocd-rbac-cm
+  namespace: argocd
+  resourceVersion: "329115"
+  uid: c0d25b31-a813-4d12-84a3-02824c4f05a2
