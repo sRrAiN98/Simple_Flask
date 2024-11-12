@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-15T07:50:42Z"
+  generation: 13400
+  name: utils
+  namespace: argocd
+  resourceVersion: "7359015"
+  uid: 37c915eb-8c71-4834-a9bb-63cc03e952cd
+spec:
+  destination:
+    namespace: tracing
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: utils
+    repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+    targetRevision: main
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true

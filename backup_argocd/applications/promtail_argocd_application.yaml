@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-14T14:09:22Z"
+  generation: 12676
+  name: promtail
+  namespace: argocd
+  resourceVersion: "7359018"
+  uid: 6ec00159-6a76-425d-83b0-72c303fae422
+spec:
+  destination:
+    namespace: logging
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: promtail
+    helm:
+      valueFiles:
+      - values.yaml
+      values: "config:\n  clients:\n    # loki의 url\n    - url: http://loki-distributed-gateway.logging.svc:80/loki/api/v1/push\n
+        \ enableTracing: true\n  snippets:\n    pipelineStages:\n      - cri: {}\n
+        \     # 해당하는 네임스페이스 로그는 수집 안 함\n      - drop:\n          source:     \"namespace\"\n
+        \         expression: \"(appofapps|argocd|cert-manager|default|gitlab|grafana|kube-public|kube-system|kubecost|logging|otel|monitoring)\"\n
+        \     # 해당하는 로그 수집 안 함\n      - drop:    \n          expression: '(.*\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}:\\d{2,5}.*)GET
+        \\/ HTTP\\/1.1\\\" 200 OK'"
+    repoURL: https://grafana.github.io/helm-charts
+    targetRevision: 6.16.6

@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-12T15:22:46Z"
+  generation: 14696
+  name: istio-argocd
+  namespace: argocd
+  resourceVersion: "7359019"
+  uid: 73787902-d691-45f0-93cb-1d1d81f32110
+spec:
+  destination:
+    namespace: istio-system
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: istio-argocd
+    repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+    targetRevision: main
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true

@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-13T03:24:02Z"
+  generation: 4791
+  name: ingress-nginx
+  namespace: argocd
+  resourceVersion: "2721842"
+  uid: 8cc81ac5-79e4-46b5-8c7e-69c4a6a6fa8d
+spec:
+  destination:
+    namespace: ingress-nginx
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: ingress-nginx
+    helm:
+      valueFiles:
+      - values.yaml
+    repoURL: https://kubernetes.github.io/ingress-nginx
+    targetRevision: 4.11.3
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true

@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"argoproj.io/v1alpha1","kind":"Application","metadata":{"annotations":{},"labels":{"argocd.argoproj.io/instance":"application"},"name":"app1","namespace":"argocd"},"spec":{"destination":{"namespace":"web","server":"https://kubernetes.default.svc"},"project":"default","source":{"helm":{"valueFiles":["values.yaml"]},"path":"Helm_Charts/AppOfApp/templates/app1","repoURL":"https://github.com/sRrAiN98/Simple_Flask.git","targetRevision":"main"},"syncPolicy":{"automated":{},"syncOptions":["CreateNamespace=true"]}}}
+  creationTimestamp: "2024-10-13T13:24:01Z"
+  generation: 14405
+  labels:
+    argocd.argoproj.io/instance: application
+  name: app1
+  namespace: argocd
+  resourceVersion: "7359023"
+  uid: 3d8ea6b2-64c2-4f32-ab4e-6c217a529383
+spec:
+  destination:
+    namespace: web
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    helm:
+      valueFiles:
+      - values.yaml
+    path: Helm_Charts/AppOfApp/templates/app1
+    repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+    targetRevision: main
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true

@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-14T01:08:29Z"
+  generation: 13190
+  name: oracle11
+  namespace: argocd
+  resourceVersion: "7359021"
+  uid: 4954715c-0ed0-4b42-95c6-80ea3027c395
+spec:
+  destination:
+    namespace: oracle
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    helm:
+      valueFiles:
+      - values.yaml
+    path: .
+    repoURL: https://github.com/sRrAiN98/oracle11-helm.git
+    targetRevision: main
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true

@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-15T07:16:08Z"
+  generation: 12337
+  name: loki-distributed
+  namespace: argocd
+  resourceVersion: "7359017"
+  uid: 70ad5ec9-81eb-43a7-8328-48f4a89fcfd5
+spec:
+  destination:
+    namespace: logging
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: loki-distributed
+    helm:
+      valueFiles:
+      - values.yaml
+      values: "#values.yaml\nloki:\n  structuredConfig:\n    compactor:\n      # 로그
+        보관 주기를 100시간으로 하겠다\n      retention_enabled: true\n      retention_delete_delay:
+        100h\n      retention_delete_worker_count: 50\n    ingester:\n      max_transfer_retries:
+        0\n      chunk_idle_period: 1h\n      chunk_target_size: 1536000\n      max_chunk_age:
+        2h\n      # 압축 방법 추천 값\n      chunk_encoding: snappy "
+    repoURL: https://grafana.github.io/helm-charts
+    targetRevision: 0.79.4
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true

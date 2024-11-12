@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-15T10:23:57Z"
+  generation: 12314
+  name: metrics-server
+  namespace: argocd
+  resourceVersion: "7359048"
+  uid: 4ea4c3b2-cd99-40f9-97fe-23d35d3551d8
+spec:
+  destination:
+    namespace: kube-system
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: metrics-server
+    helm:
+      valueFiles:
+      - values.yaml
+      values: |-
+        args:
+          - --kubelet-insecure-tls
+    repoURL: https://kubernetes-sigs.github.io/metrics-server/
+    targetRevision: 3.12.2
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true

@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-13T13:23:59Z"
+  generation: 20518
+  name: application
+  namespace: argocd
+  resourceVersion: "7359014"
+  uid: 808e6ea1-cea6-4bdf-8cd3-e20742e5ae42
+spec:
+  destination:
+    namespace: web
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    helm:
+      valueFiles:
+      - values.yaml
+    path: Helm_Charts/AppOfApp/apps
+    repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+    targetRevision: main
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
