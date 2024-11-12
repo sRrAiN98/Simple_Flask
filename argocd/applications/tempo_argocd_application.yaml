@@ -1,0 +1,89 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-15T07:16:47Z"
+  generation: 12259
+  name: tempo
+  namespace: argocd
+  resourceVersion: "7359016"
+  uid: 923dcedf-f4c5-4ef2-9528-5a50bfa44c2d
+spec:
+  destination:
+    namespace: tracing
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: tempo
+    helm:
+      valueFiles:
+      - values.yaml
+      values: |-
+        # values.yaml
+        # 배포된 프로메테우스의 CoreDNS 기입
+        tempo:
+          metricsGenerator:
+            enabled: true
+            remoteWriteUrl: "http://kube-prometheus-stack-prometheus.istio-system:9090/api/v1/write"
+    repoURL: https://grafana.github.io/helm-charts
+    targetRevision: 1.10.3
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+status:
+  controllerNamespace: argocd
+  health:
+    status: Missing
+  reconciledAt: "2024-11-12T14:07:12Z"
+  resources:
+  - health:
+      status: Missing
+    kind: ConfigMap
+    name: tempo
+    namespace: tracing
+    status: OutOfSync
+    version: v1
+  - health:
+      status: Missing
+    kind: Service
+    name: tempo
+    namespace: tracing
+    status: OutOfSync
+    version: v1
+  - health:
+      status: Missing
+    kind: ServiceAccount
+    name: tempo
+    namespace: tracing
+    status: OutOfSync
+    version: v1
+  - group: apps
+    health:
+      status: Missing
+    kind: StatefulSet
+    name: tempo
+    namespace: tracing
+    status: OutOfSync
+    version: v1
+  sourceType: Helm
+  summary: {}
+  sync:
+    comparedTo:
+      destination:
+        namespace: tracing
+        server: https://kubernetes.default.svc
+      source:
+        chart: tempo
+        helm:
+          valueFiles:
+          - values.yaml
+          values: |-
+            # values.yaml
+            # 배포된 프로메테우스의 CoreDNS 기입
+            tempo:
+              metricsGenerator:
+                enabled: true
+                remoteWriteUrl: "http://kube-prometheus-stack-prometheus.istio-system:9090/api/v1/write"
+        repoURL: https://grafana.github.io/helm-charts
+        targetRevision: 1.10.3
+    revision: 1.10.3
+    status: OutOfSync

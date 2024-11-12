@@ -2,10 +2,10 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   creationTimestamp: "2024-10-12T15:25:03Z"
-  generation: 999
+  generation: 14801
   name: frontend
   namespace: argocd
-  resourceVersion: "461085"
+  resourceVersion: "7359114"
   uid: 5e2acff3-10e8-46b3-97bb-aeec6484437d
 spec:
   destination:
@@ -21,15 +21,9 @@ spec:
     syncOptions:
     - CreateNamespace=true
 status:
-  conditions:
-  - lastTransitionTime: "2024-10-14T13:27:02Z"
-    message: 'Failed to load target state: failed to generate manifest for source
-      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
-      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
-    type: ComparisonError
   controllerNamespace: argocd
   health:
-    status: Progressing
+    status: Healthy
   history:
   - deployStartedAt: "2024-10-12T15:25:55Z"
     deployedAt: "2024-10-12T15:26:10Z"
@@ -72,93 +66,27 @@ status:
       repoURL: https://github.com/sRrAiN98/Simple_Flask.git
       targetRevision: main
   operationState:
-    finishedAt: "2024-10-13T13:50:52Z"
+    finishedAt: "2024-10-14T14:14:36Z"
     message: successfully synced (all tasks run)
     operation:
       initiatedBy:
-        automated: true
-      retry:
-        limit: 5
+        username: admin
+      retry: {}
       sync:
+        resources:
+        - group: cert-manager.io
+          kind: Certificate
+          name: frontend-tls
+          namespace: istio-system
         revision: 112d8016d82e5a036942a339ed4750b8f7868249
         syncOptions:
         - CreateNamespace=true
+        syncStrategy:
+          hook: {}
     phase: Succeeded
-    startedAt: "2024-10-13T13:50:46Z"
+    startedAt: "2024-10-14T14:14:34Z"
     syncResult:
       resources:
-      - group: policy
-        hookPhase: Running
-        kind: PodDisruptionBudget
-        message: poddisruptionbudget.policy/frontend configured
-        name: frontend
-        namespace: web
-        status: Synced
-        syncPhase: Sync
-        version: v1
-      - group: ""
-        hookPhase: Running
-        kind: ServiceAccount
-        message: serviceaccount/frontend unchanged
-        name: frontend
-        namespace: web
-        status: Synced
-        syncPhase: Sync
-        version: v1
-      - group: ""
-        hookPhase: Running
-        kind: Service
-        message: service/frontend configured
-        name: frontend
-        namespace: web
-        status: Synced
-        syncPhase: Sync
-        version: v1
-      - group: apps
-        hookPhase: Running
-        kind: Deployment
-        message: deployment.apps/frontend configured
-        name: frontend
-        namespace: web
-        status: Synced
-        syncPhase: Sync
-        version: v1
-      - group: autoscaling
-        hookPhase: Running
-        kind: HorizontalPodAutoscaler
-        message: horizontalpodautoscaler.autoscaling/frontend unchanged
-        name: frontend
-        namespace: web
-        status: Synced
-        syncPhase: Sync
-        version: v2
-      - group: networking.k8s.io
-        hookPhase: Running
-        kind: Ingress
-        message: ingress.networking.k8s.io/frontend unchanged
-        name: frontend
-        namespace: web
-        status: Synced
-        syncPhase: Sync
-        version: v1
-      - group: networking.istio.io
-        hookPhase: Running
-        kind: VirtualService
-        message: virtualservice.networking.istio.io/frontend unchanged
-        name: frontend
-        namespace: web
-        status: Synced
-        syncPhase: Sync
-        version: v1
-      - group: networking.istio.io
-        hookPhase: Running
-        kind: Gateway
-        message: gateway.networking.istio.io/frontend unchanged
-        name: frontend
-        namespace: web
-        status: Synced
-        syncPhase: Sync
-        version: v1
       - group: cert-manager.io
         hookPhase: Running
         kind: Certificate
@@ -173,21 +101,19 @@ status:
         path: Helm_Charts/front
         repoURL: https://github.com/sRrAiN98/Simple_Flask.git
         targetRevision: main
-  reconciledAt: "2024-10-14T13:48:02Z"
+  reconciledAt: "2024-11-12T14:07:06Z"
   resources:
   - health:
       status: Healthy
     kind: Service
     name: frontend
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - kind: ServiceAccount
     name: frontend
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: apps
     health:
@@ -195,42 +121,37 @@ status:
     kind: Deployment
     name: frontend
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: autoscaling
     health:
-      message: the HPA controller was able to get the target's current scale
+      message: recommended size matches current size
       status: Healthy
     kind: HorizontalPodAutoscaler
     name: frontend
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v2
   - group: cert-manager.io
     health:
-      message: Issuing certificate as Secret does not exist
-      status: Progressing
+      message: Certificate is up to date and has not expired
+      status: Healthy
     kind: Certificate
     name: frontend-tls
     namespace: istio-system
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: networking.istio.io
     kind: Gateway
     name: frontend
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: networking.istio.io
     kind: VirtualService
     name: frontend
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: networking.k8s.io
     health:
@@ -238,23 +159,20 @@ status:
     kind: Ingress
     name: frontend
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: policy
     kind: PodDisruptionBudget
     name: frontend
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
+  sourceType: Helm
   summary:
     externalURLs:
     - http://todo.srrain.store/
-    - http://todo.srrain.store/.well-known/acme-challenge/MfBrXBByXoElKDOZr8pVWDTQl3OzbiVeRhPsf1mNyjE
     images:
     - choi32739/todolist:frontend
-    - quay.io/jetstack/cert-manager-acmesolver:v1.16.1
   sync:
     comparedTo:
       destination:
@@ -264,4 +182,5 @@ status:
         path: Helm_Charts/front
         repoURL: https://github.com/sRrAiN98/Simple_Flask.git
         targetRevision: main
-    status: Unknown
+    revision: ded365d32b77cb6d30d37395019c90afe9fca652
+    status: Synced

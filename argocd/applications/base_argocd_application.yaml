@@ -2,10 +2,10 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   creationTimestamp: "2024-10-12T15:05:39Z"
-  generation: 929
+  generation: 13632
   name: base
   namespace: argocd
-  resourceVersion: "461077"
+  resourceVersion: "7359076"
   uid: 9f1df362-a771-42f8-9c5f-88809bb4836e
 spec:
   destination:
@@ -24,12 +24,6 @@ spec:
     syncOptions:
     - CreateNamespace=true
 status:
-  conditions:
-  - lastTransitionTime: "2024-10-14T13:33:02Z"
-    message: 'Failed to load target state: failed to generate manifest for source
-      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
-      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
-    type: ComparisonError
   controllerNamespace: argocd
   health:
     status: Healthy
@@ -230,20 +224,89 @@ status:
           - values.yaml
         repoURL: https://istio-release.storage.googleapis.com/charts
         targetRevision: 1.23.2
-  reconciledAt: "2024-10-14T13:48:02Z"
+  reconciledAt: "2024-11-12T14:07:12Z"
   resources:
   - kind: ServiceAccount
     name: istio-reader-service-account
     namespace: istio-system
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: admissionregistration.k8s.io
     kind: ValidatingWebhookConfiguration
     name: istiod-default-validator
-    requiresPruning: true
-    status: Unknown
+    status: OutOfSync
     version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: authorizationpolicies.security.istio.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: destinationrules.networking.istio.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: envoyfilters.networking.istio.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: gateways.networking.istio.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: peerauthentications.security.istio.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: proxyconfigs.networking.istio.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: requestauthentications.security.istio.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: serviceentries.networking.istio.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: sidecars.networking.istio.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: telemetries.telemetry.istio.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: virtualservices.networking.istio.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: wasmplugins.extensions.istio.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: workloadentries.networking.istio.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: workloadgroups.networking.istio.io
+    status: Synced
+    version: v1
+  sourceType: Helm
   summary: {}
   sync:
     comparedTo:
@@ -257,4 +320,5 @@ status:
           - values.yaml
         repoURL: https://istio-release.storage.googleapis.com/charts
         targetRevision: 1.23.2
-    status: Unknown
+    revision: 1.23.2
+    status: OutOfSync

@@ -2,10 +2,10 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   creationTimestamp: "2024-10-14T01:08:29Z"
-  generation: 329
+  generation: 13190
   name: oracle11
   namespace: argocd
-  resourceVersion: "461078"
+  resourceVersion: "7359021"
   uid: 4954715c-0ed0-4b42-95c6-80ea3027c395
 spec:
   destination:
@@ -24,86 +24,15 @@ spec:
     syncOptions:
     - CreateNamespace=true
 status:
-  conditions:
-  - lastTransitionTime: "2024-10-14T13:27:02Z"
-    message: 'Failed to load target state: failed to generate manifest for source
-      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
-      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
-    type: ComparisonError
   controllerNamespace: argocd
   health:
     status: Healthy
   history:
-  - deployStartedAt: "2024-10-14T01:08:30Z"
-    deployedAt: "2024-10-14T01:08:34Z"
-    id: 0
-    initiatedBy:
-      automated: true
-    revision: 01f2c0f9c6a72bf4eeb512cb6c2d8eeb8c427928
-    source:
-      helm:
-        valueFiles:
-        - values.yaml
-      path: .
-      repoURL: https://github.com/sRrAiN98/oracle11-helm.git
-      targetRevision: main
-  - deployStartedAt: "2024-10-14T01:17:53Z"
-    deployedAt: "2024-10-14T01:17:54Z"
-    id: 1
-    initiatedBy:
-      automated: true
-    revision: edfe345c770858a6ccc84e3690118abb06502e98
-    source:
-      helm:
-        valueFiles:
-        - values.yaml
-      path: .
-      repoURL: https://github.com/sRrAiN98/oracle11-helm.git
-      targetRevision: main
-  - deployStartedAt: "2024-10-14T01:18:42Z"
-    deployedAt: "2024-10-14T01:18:43Z"
-    id: 2
-    initiatedBy:
-      automated: true
-    revision: 930262ad210e191c3ffe7f44c5b914cc048af1b3
-    source:
-      helm:
-        valueFiles:
-        - values.yaml
-      path: .
-      repoURL: https://github.com/sRrAiN98/oracle11-helm.git
-      targetRevision: main
-  - deployStartedAt: "2024-10-14T01:24:20Z"
-    deployedAt: "2024-10-14T01:24:21Z"
-    id: 3
+  - deployStartedAt: "2024-10-15T12:41:38Z"
+    deployedAt: "2024-10-15T12:41:39Z"
+    id: 7
     initiatedBy:
       username: admin
-    revision: 297a6fc22d4a56a3535c54d60bdecd76c00429fb
-    source:
-      helm:
-        valueFiles:
-        - values.yaml
-      path: .
-      repoURL: https://github.com/sRrAiN98/oracle11-helm.git
-      targetRevision: main
-  - deployStartedAt: "2024-10-14T01:29:06Z"
-    deployedAt: "2024-10-14T01:29:12Z"
-    id: 4
-    initiatedBy:
-      automated: true
-    revision: 103a08e5225207c0133fd5363b475a7ac3ee921a
-    source:
-      helm:
-        valueFiles:
-        - values.yaml
-      path: .
-      repoURL: https://github.com/sRrAiN98/oracle11-helm.git
-      targetRevision: main
-  - deployStartedAt: "2024-10-14T01:29:39Z"
-    deployedAt: "2024-10-14T01:29:41Z"
-    id: 5
-    initiatedBy:
-      automated: true
     revision: 06220df5e7194f3513fd24e4b35fa12d7665560f
     source:
       helm:
@@ -112,20 +41,138 @@ status:
       path: .
       repoURL: https://github.com/sRrAiN98/oracle11-helm.git
       targetRevision: main
+  - deployStartedAt: "2024-10-15T12:46:08Z"
+    deployedAt: "2024-10-15T12:46:10Z"
+    id: 8
+    initiatedBy:
+      automated: true
+    revision: ddda21ba130e167746149d21e8650394a42aac34
+    source:
+      helm:
+        valueFiles:
+        - values.yaml
+      path: .
+      repoURL: https://github.com/sRrAiN98/oracle11-helm.git
+      targetRevision: main
+  - deployStartedAt: "2024-10-15T12:47:45Z"
+    deployedAt: "2024-10-15T12:47:47Z"
+    id: 9
+    initiatedBy:
+      username: admin
+    revision: ddda21ba130e167746149d21e8650394a42aac34
+    source:
+      helm:
+        valueFiles:
+        - values.yaml
+      path: .
+      repoURL: https://github.com/sRrAiN98/oracle11-helm.git
+      targetRevision: main
+  - deployStartedAt: "2024-10-15T12:48:34Z"
+    deployedAt: "2024-10-15T12:48:35Z"
+    id: 10
+    initiatedBy:
+      automated: true
+    revision: 327313ca651ba91facd24c19cb88bf692f743672
+    source:
+      helm:
+        valueFiles:
+        - values.yaml
+      path: .
+      repoURL: https://github.com/sRrAiN98/oracle11-helm.git
+      targetRevision: main
+  - deployStartedAt: "2024-10-15T13:16:02Z"
+    deployedAt: "2024-10-15T13:16:03Z"
+    id: 11
+    initiatedBy:
+      automated: true
+    revision: da60fc70dbba2fa3e6f11274a7312762f21a3489
+    source:
+      helm:
+        valueFiles:
+        - values.yaml
+      path: .
+      repoURL: https://github.com/sRrAiN98/oracle11-helm.git
+      targetRevision: main
+  - deployStartedAt: "2024-10-15T13:16:40Z"
+    deployedAt: "2024-10-15T13:16:41Z"
+    id: 12
+    initiatedBy:
+      username: admin
+    revision: da60fc70dbba2fa3e6f11274a7312762f21a3489
+    source:
+      helm:
+        valueFiles:
+        - values.yaml
+      path: .
+      repoURL: https://github.com/sRrAiN98/oracle11-helm.git
+      targetRevision: main
+  - deployStartedAt: "2024-10-15T13:17:24Z"
+    deployedAt: "2024-10-15T13:17:25Z"
+    id: 13
+    initiatedBy:
+      automated: true
+    revision: da555888279208ed6cc96541ffc80e8cbb84cf39
+    source:
+      helm:
+        valueFiles:
+        - values.yaml
+      path: .
+      repoURL: https://github.com/sRrAiN98/oracle11-helm.git
+      targetRevision: main
+  - deployStartedAt: "2024-10-15T13:18:22Z"
+    deployedAt: "2024-10-15T13:18:24Z"
+    id: 14
+    initiatedBy:
+      automated: true
+    revision: 6f07527f357d7358e4bfdde97bb630aaafc26410
+    source:
+      helm:
+        valueFiles:
+        - values.yaml
+      path: .
+      repoURL: https://github.com/sRrAiN98/oracle11-helm.git
+      targetRevision: main
+  - deployStartedAt: "2024-10-15T13:19:22Z"
+    deployedAt: "2024-10-15T13:19:23Z"
+    id: 15
+    initiatedBy:
+      automated: true
+    revision: 7e63fdc64f9e721787a771e7c7a03b579800ecc0
+    source:
+      helm:
+        valueFiles:
+        - values.yaml
+      path: .
+      repoURL: https://github.com/sRrAiN98/oracle11-helm.git
+      targetRevision: main
+  - deployStartedAt: "2024-10-15T13:35:50Z"
+    deployedAt: "2024-10-15T13:35:51Z"
+    id: 16
+    initiatedBy:
+      username: admin
+    revision: 2b7a2f8aba08629ec3597fda86442ccb2294f729
+    source:
+      helm:
+        valueFiles:
+        - values.yaml
+      path: .
+      repoURL: https://github.com/sRrAiN98/oracle11-helm.git
+      targetRevision: main
   operationState:
-    finishedAt: "2024-10-14T01:29:41Z"
+    finishedAt: "2024-10-15T13:35:51Z"
     message: successfully synced (all tasks run)
     operation:
       initiatedBy:
-        automated: true
-      retry:
-        limit: 5
+        username: admin
+      retry: {}
       sync:
-        revision: 06220df5e7194f3513fd24e4b35fa12d7665560f
+        revision: 2b7a2f8aba08629ec3597fda86442ccb2294f729
         syncOptions:
         - CreateNamespace=true
+        syncStrategy:
+          hook: {}
     phase: Succeeded
-    startedAt: "2024-10-14T01:29:39Z"
+    startedAt: "2024-10-15T13:35:50Z"
     syncResult:
       resources:
       - group: ""
@@ -157,14 +204,14 @@ status:
         version: v1
       - group: apps
         hookPhase: Running
-        kind: StatefulSet
-        message: statefulset.apps/oracle11 configured
+        kind: Deployment
+        message: deployment.apps/oracle11 configured
         name: oracle11
         namespace: oracle
         status: Synced
         syncPhase: Sync
         version: v1
-      revision: 06220df5e7194f3513fd24e4b35fa12d7665560f
+      revision: 2b7a2f8aba08629ec3597fda86442ccb2294f729
       source:
         helm:
           valueFiles:
@@ -172,40 +219,36 @@ status:
         path: .
         repoURL: https://github.com/sRrAiN98/oracle11-helm.git
         targetRevision: main
-  reconciledAt: "2024-10-14T13:48:02Z"
+  reconciledAt: "2024-11-12T14:07:12Z"
   resources:
   - health:
       status: Healthy
     kind: PersistentVolumeClaim
     name: oracle11
     namespace: oracle
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - health:
       status: Healthy
     kind: Service
     name: oracle11
     namespace: oracle
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - kind: ServiceAccount
     name: oracle11
     namespace: oracle
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: apps
     health:
-      message: 'partitioned roll out complete: 1 new pods have been updated...'
       status: Healthy
-    kind: StatefulSet
+    kind: Deployment
     name: oracle11
     namespace: oracle
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
+  sourceType: Helm
   summary:
     images:
     - jaspeen/oracle-xe-11g:latest
@@ -221,4 +264,5 @@ status:
         path: .
         repoURL: https://github.com/sRrAiN98/oracle11-helm.git
         targetRevision: main
-    status: Unknown
+    revision: f4febb3021f7507098fdfd73d7bf5f7575ce839f
+    status: Synced

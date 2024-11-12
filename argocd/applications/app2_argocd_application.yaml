@@ -1,12 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  creationTimestamp: "2024-10-12T15:24:31Z"
-  generation: 944
-  name: backend
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"argoproj.io/v1alpha1","kind":"Application","metadata":{"annotations":{},"labels":{"argocd.argoproj.io/instance":"application"},"name":"app2","namespace":"argocd"},"spec":{"destination":{"namespace":"web","server":"https://kubernetes.default.svc"},"project":"default","source":{"helm":{"valueFiles":["values.yaml"]},"path":"Helm_Charts/AppOfApp/templates/app2","repoURL":"https://github.com/sRrAiN98/Simple_Flask.git","targetRevision":"main"},"syncPolicy":{"automated":{},"syncOptions":["CreateNamespace=true"]}}}
+  creationTimestamp: "2024-10-13T13:24:00Z"
+  generation: 14308
+  labels:
+    argocd.argoproj.io/instance: application
+  name: app2
   namespace: argocd
-  resourceVersion: "461081"
-  uid: e992c941-b088-43a1-9691-1061f731350c
+  resourceVersion: "7359020"
+  uid: af498c0a-968c-450f-8eee-97ce6a27f7a7
 spec:
   destination:
     namespace: web
@@ -16,7 +21,7 @@ spec:
     helm:
       valueFiles:
       - values.yaml
-    path: Helm_Charts/back
+    path: Helm_Charts/AppOfApp/templates/app2
     repoURL: https://github.com/sRrAiN98/Simple_Flask.git
     targetRevision: main
   syncPolicy:
@@ -24,32 +29,13 @@ spec:
     syncOptions:
     - CreateNamespace=true
 status:
-  conditions:
-  - lastTransitionTime: "2024-10-14T13:27:02Z"
-    message: 'Failed to load target state: failed to generate manifest for source
-      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
-      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
-    type: ComparisonError
   controllerNamespace: argocd
   health:
     status: Healthy
   history:
-  - deployStartedAt: "2024-10-12T15:24:33Z"
-    deployedAt: "2024-10-12T15:24:44Z"
+  - deployStartedAt: "2024-10-13T13:24:01Z"
+    deployedAt: "2024-10-13T13:24:06Z"
     id: 0
-    initiatedBy:
-      automated: true
-    revision: f866bc9934a834a645c39117dd4da34bbb1f3e17
-    source:
-      helm:
-        valueFiles:
-        - values.yaml
-      path: Helm_Charts/back
-      repoURL: https://github.com/sRrAiN98/Simple_Flask.git
-      targetRevision: main
-  - deployStartedAt: "2024-10-13T13:19:36Z"
-    deployedAt: "2024-10-13T13:19:37Z"
-    id: 1
     initiatedBy:
       automated: true
     revision: a6724813bedc36593ba331059ce22c4587d0929f
@@ -57,24 +43,24 @@ status:
       helm:
         valueFiles:
         - values.yaml
-      path: Helm_Charts/back
+      path: Helm_Charts/AppOfApp/templates/app2
       repoURL: https://github.com/sRrAiN98/Simple_Flask.git
       targetRevision: main
-  - deployStartedAt: "2024-10-13T13:50:46Z"
-    deployedAt: "2024-10-13T13:50:50Z"
-    id: 2
+  - deployStartedAt: "2024-10-15T08:59:31Z"
+    deployedAt: "2024-10-15T08:59:35Z"
+    id: 1
     initiatedBy:
       automated: true
-    revision: 112d8016d82e5a036942a339ed4750b8f7868249
+    revision: dc3c273a84183e07e88d984021516b107e6a9e41
     source:
       helm:
         valueFiles:
         - values.yaml
-      path: Helm_Charts/back
+      path: Helm_Charts/AppOfApp/templates/app2
       repoURL: https://github.com/sRrAiN98/Simple_Flask.git
       targetRevision: main
   operationState:
-    finishedAt: "2024-10-13T13:50:50Z"
+    finishedAt: "2024-10-15T08:59:36Z"
     message: successfully synced (all tasks run)
     operation:
       initiatedBy:
@@ -82,18 +68,18 @@ status:
       retry:
         limit: 5
       sync:
-        revision: 112d8016d82e5a036942a339ed4750b8f7868249
+        revision: dc3c273a84183e07e88d984021516b107e6a9e41
         syncOptions:
         - CreateNamespace=true
     phase: Succeeded
-    startedAt: "2024-10-13T13:50:46Z"
+    startedAt: "2024-10-15T08:59:31Z"
     syncResult:
       resources:
       - group: policy
         hookPhase: Running
         kind: PodDisruptionBudget
-        message: poddisruptionbudget.policy/backend configured
-        name: backend
+        message: poddisruptionbudget.policy/app2 configured
+        name: app2
         namespace: web
         status: Synced
         syncPhase: Sync
@@ -101,8 +87,8 @@ status:
       - group: ""
         hookPhase: Running
         kind: ServiceAccount
-        message: serviceaccount/backend unchanged
-        name: backend
+        message: serviceaccount/app2 unchanged
+        name: app2
         namespace: web
         status: Synced
         syncPhase: Sync
@@ -110,8 +96,8 @@ status:
       - group: ""
         hookPhase: Running
         kind: Service
-        message: service/backend configured
-        name: backend
+        message: service/app2 configured
+        name: app2
         namespace: web
         status: Synced
         syncPhase: Sync
@@ -119,8 +105,8 @@ status:
       - group: apps
         hookPhase: Running
         kind: Deployment
-        message: deployment.apps/backend configured
-        name: backend
+        message: deployment.apps/app2 configured
+        name: app2
         namespace: web
         status: Synced
         syncPhase: Sync
@@ -128,101 +114,77 @@ status:
       - group: autoscaling
         hookPhase: Running
         kind: HorizontalPodAutoscaler
-        message: horizontalpodautoscaler.autoscaling/backend unchanged
-        name: backend
+        message: horizontalpodautoscaler.autoscaling/app2 unchanged
+        name: app2
         namespace: web
         status: Synced
         syncPhase: Sync
         version: v2
-      - group: networking.k8s.io
-        hookPhase: Running
-        kind: Ingress
-        message: ingress.networking.k8s.io/backend unchanged
-        name: backend
-        namespace: web
-        status: Synced
-        syncPhase: Sync
-        version: v1
       - group: networking.istio.io
         hookPhase: Running
         kind: VirtualService
-        message: virtualservice.networking.istio.io/backend unchanged
-        name: backend
+        message: virtualservice.networking.istio.io/app2 unchanged
+        name: app2
         namespace: web
         status: Synced
         syncPhase: Sync
         version: v1
-      revision: 112d8016d82e5a036942a339ed4750b8f7868249
+      revision: dc3c273a84183e07e88d984021516b107e6a9e41
       source:
         helm:
           valueFiles:
           - values.yaml
-        path: Helm_Charts/back
+        path: Helm_Charts/AppOfApp/templates/app2
         repoURL: https://github.com/sRrAiN98/Simple_Flask.git
         targetRevision: main
-  reconciledAt: "2024-10-14T13:48:02Z"
+  reconciledAt: "2024-11-12T14:07:12Z"
   resources:
   - health:
       status: Healthy
     kind: Service
-    name: backend
+    name: app2
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - kind: ServiceAccount
-    name: backend
+    name: app2
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: apps
     health:
       status: Healthy
     kind: Deployment
-    name: backend
+    name: app2
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: autoscaling
     health:
       message: the HPA controller was able to get the target's current scale
       status: Healthy
     kind: HorizontalPodAutoscaler
-    name: backend
+    name: app2
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v2
   - group: networking.istio.io
     kind: VirtualService
-    name: backend
+    name: app2
     namespace: web
-    requiresPruning: true
-    status: Unknown
-    version: v1
-  - group: networking.k8s.io
-    health:
-      status: Healthy
-    kind: Ingress
-    name: backend
-    namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: policy
     kind: PodDisruptionBudget
-    name: backend
+    name: app2
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
+  sourceType: Helm
   summary:
-    externalURLs:
-    - http://back.srrain.store/
     images:
-    - choi32739/todolist:backend
+    - docker.io/istio/proxyv2:1.23.2
+    - tkavna123/app2:latest
   sync:
     comparedTo:
       destination:
@@ -232,7 +194,8 @@ status:
         helm:
           valueFiles:
           - values.yaml
-        path: Helm_Charts/back
+        path: Helm_Charts/AppOfApp/templates/app2
         repoURL: https://github.com/sRrAiN98/Simple_Flask.git
         targetRevision: main
-    status: Unknown
+    revision: ded365d32b77cb6d30d37395019c90afe9fca652
+    status: Synced

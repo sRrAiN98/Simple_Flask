@@ -2,10 +2,10 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   creationTimestamp: "2024-10-13T13:55:23Z"
-  generation: 478
+  generation: 13214
   name: istio-ingressgateway
   namespace: argocd
-  resourceVersion: "461100"
+  resourceVersion: "7358947"
   uid: 72a4799d-9982-423d-82fa-3e37ecae3b71
 spec:
   destination:
@@ -24,12 +24,6 @@ spec:
     syncOptions:
     - CreateNamespace=true
 status:
-  conditions:
-  - lastTransitionTime: "2024-10-14T13:33:02Z"
-    message: 'Failed to load target state: failed to generate manifest for source
-      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
-      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
-    type: ComparisonError
   controllerNamespace: argocd
   health:
     status: Healthy
@@ -139,21 +133,19 @@ status:
           - values.yaml
         repoURL: https://istio-release.storage.googleapis.com/charts
         targetRevision: 1.23.2
-  reconciledAt: "2024-10-14T13:48:02Z"
+  reconciledAt: "2024-11-12T14:06:53Z"
   resources:
   - health:
       status: Healthy
     kind: Service
     name: istio-ingressgateway
     namespace: istio-system
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - kind: ServiceAccount
     name: istio-ingressgateway
     namespace: istio-system
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: apps
     health:
@@ -161,33 +153,30 @@ status:
     kind: Deployment
     name: istio-ingressgateway
     namespace: istio-system
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: autoscaling
     health:
-      message: the HPA controller was able to get the target's current scale
+      message: recommended size matches current size
       status: Healthy
     kind: HorizontalPodAutoscaler
     name: istio-ingressgateway
     namespace: istio-system
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v2
   - group: rbac.authorization.k8s.io
     kind: Role
     name: istio-ingressgateway
     namespace: istio-system
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: RoleBinding
     name: istio-ingressgateway
     namespace: istio-system
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
+  sourceType: Helm
   summary:
     images:
     - docker.io/istio/proxyv2:1.23.2
@@ -203,4 +192,5 @@ status:
           - values.yaml
         repoURL: https://istio-release.storage.googleapis.com/charts
         targetRevision: 1.23.2
-    status: Unknown
+    revision: 1.23.2
+    status: Synced

@@ -2,10 +2,10 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   creationTimestamp: "2024-10-13T13:23:59Z"
-  generation: 513
+  generation: 20518
   name: application
   namespace: argocd
-  resourceVersion: "461191"
+  resourceVersion: "7359014"
   uid: 808e6ea1-cea6-4bdf-8cd3-e20742e5ae42
 spec:
   destination:
@@ -24,12 +24,6 @@ spec:
     syncOptions:
     - CreateNamespace=true
 status:
-  conditions:
-  - lastTransitionTime: "2024-10-14T13:48:42Z"
-    message: 'Failed to load target state: failed to generate manifest for source
-      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
-      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
-    type: ComparisonError
   controllerNamespace: argocd
   health:
     status: Healthy
@@ -124,29 +118,27 @@ status:
         path: Helm_Charts/AppOfApp/apps
         repoURL: https://github.com/sRrAiN98/Simple_Flask.git
         targetRevision: main
-  reconciledAt: "2024-10-14T13:48:22Z"
+  reconciledAt: "2024-11-12T14:07:12Z"
   resources:
   - group: argoproj.io
     kind: Application
     name: app1
     namespace: argocd
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1alpha1
   - group: argoproj.io
     kind: Application
     name: app2
     namespace: argocd
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1alpha1
   - group: argoproj.io
     kind: Application
     name: app3
     namespace: argocd
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1alpha1
+  sourceType: Helm
   summary: {}
   sync:
     comparedTo:
@@ -160,4 +152,5 @@ status:
         path: Helm_Charts/AppOfApp/apps
         repoURL: https://github.com/sRrAiN98/Simple_Flask.git
         targetRevision: main
-    status: Unknown
+    revision: ded365d32b77cb6d30d37395019c90afe9fca652
+    status: Synced

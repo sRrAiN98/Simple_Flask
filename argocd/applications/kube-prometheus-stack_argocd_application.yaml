@@ -1,0 +1,3050 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-14T14:08:03Z"
+  generation: 13354
+  name: kube-prometheus-stack
+  namespace: argocd
+  resourceVersion: "7359031"
+  uid: 1cab51a8-f65f-4414-9f30-a6865cdf472d
+spec:
+  destination:
+    namespace: istio-system
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: kube-prometheus-stack
+    helm:
+      valueFiles:
+      - values.yaml
+      values: "grafana:\n  persistence:\n    enabled: true\n    size: 5Gi\n  adminPassword:
+        \"qwer1234!\"\n  ingress:\n    enabled: false\n    ingressClassName: nginx\n
+        \   annotations: \n      istio: aaa \n    labels: {}\n    hosts: \n      -
+        grafana.srrain.store\n    path: /\n\n    # tls: \n    #   - secretName: grafana-general-tls\n
+        \   #     hosts:\n    #     - grafana.srrain.store\n  dashboards:\n    default:\n
+        \     istio-control-plane-dashboard:\n        gnetId: 7645\n        revision:
+        231\n        datasource: Prometheus\n      istio-mesh-dashboard:\n        gnetId:
+        7639\n        revision: 231\n        datasource: Prometheus\n      istio-performance-dashboard:\n
+        \       gnetId: 12153\n        revision: 231\n        datasource: Prometheus\n
+        \     istio-service-dashboard:\n        gnetId: 7636\n        revision: 231\n
+        \       datasource: Prometheus\n      istio-wasm-extension-dashboard:\n        gnetId:
+        13277\n        revision: 188\n        datasource: Prometheus\n      istio-workload-dashboard:\n
+        \       gnetId: 7630\n        revision: 231\n        datasource: Prometheus\n\n
+        \ #datasource에 pvc가 안 붙어 있어서 휘발되기에 미리 정의\n  additionalDataSources: \n  - name:
+        Tempo\n    type: tempo\n    typeName: Tempo\n    access: proxy\n    url: http://tempo.tracing.svc:3100\n
+        \   password: ''\n    user: ''\n    database: ''\n    basicAuth: false\n    isDefault:
+        false\n    jsonData:\n    nodeGraph:\n      enabled: true\n    tracesToLogs:\n
+        \     datasourceUid: loki\n      filterBySpanID: false\n      filterByTraceID:
+        true\n      mapTagNamesEnabled: false\n      tags:\n          - compose_service\n
+        \   readOnly: false\n    editable: true\n  - name: loki\n    type: loki\n
+        \   uid: \n    url: http://loki-distributed-gateway.logging.svc\n    access:
+        proxy\n    basicAuth: false\n    jsonData:\n      serviceMap:\n        datasourceUid:
+        'prometheus'\n\nprometheus:      \n  additionalServiceMonitors:\n    - name:
+        \"istio-component-monitor\"\n      additionalLabels:\n        monitoring:
+        istio-components\n        release: istio\n      jobLabel: \"istio\"\n      targetLabels:\n
+        \       - app\n      selector:\n        matchExpressions:\n          - {key:
+        istio, operator: In, values: [pilot]}\n      namespaceSelector:\n        any:
+        true\n      endpoints:\n        - port: http-monitoring\n          interval:
+        15s\n\n  additionalPodMonitors:\n    - name: \"envoy-stats-monitor\"\n      additionalLabels:\n
+        \       monitoring: istio-proxies\n        release: istio\n      jobLabel:
+        \"envoy-stats\"\n      selector:\n        matchExpressions:\n          - {key:
+        istio-prometheus-ignore, operator: DoesNotExist}\n      podTargetLabels: {}\n
+        \     sampleLimit: 0\n      namespaceSelector:\n        any: true\n        matchNames:
+        []\n      podMetricsEndpoints:\n        - path: /stats/prometheus\n          interval:
+        15s\n          relabelings:\n            - action: keep\n              sourceLabels:
+        [__meta_kubernetes_pod_container_name]\n              regex: \"istio-proxy\"\n
+        \           - action: keep\n              sourceLabels: [__meta_kubernetes_pod_annotationpresent_prometheus_io_scrape]\n
+        \           - sourceLabels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]\n
+        \             action: replace\n              regex: ([^:]+)(?::\\d+)?;(\\d+)\n
+        \             replacement: $1:$2\n              targetLabel: __address__\n
+        \           - action: labeldrop\n              regex: \"__meta_kubernetes_pod_label_(.+)\"\n
+        \           - sourceLabels: [__meta_kubernetes_namespace]\n              action:
+        replace\n              targetLabel: namespace\n            - sourceLabels:
+        [__meta_kubernetes_pod_name]\n              action: replace\n              targetLabel:
+        pod_name\n\n  prometheusSpec:\n    enableRemoteWriteReceiver: true\n    #Tempo에서
+        Service Graph 그리기 위해 외부 접근 활성화\n    # dashboard가 휘발성이라 pvc mount\n    storageSpec:\n
+        \     volumeClaimTemplate:\n        spec:\n          accessModes: [\"ReadWriteOnce\"]\n
+        \         resources:\n            requests:\n              storage: 5Gi\n\n
+        \   volumeMounts:\n    - mountPath: /etc/istio-certs\n      name: istio-certs\n
+        \   volumes:\n    - name: istio-certs\n      secret:\n        defaultMode:
+        420\n        optional: true\n        secretName: istio-ca-secret\n    additionalScrapeConfigs:\n
+        \     - job_name: 'otel-collector'\n        scrape_interval: 10s\n        static_configs:\n
+        \         - targets: ['otel-collector.otel.svc:8889']\n          - targets:
+        ['otel-collector.otel.svc:8888']\n      - job_name: 'kubernetes-pods-istio-secure'\n
+        \       scheme: https\n        tls_config:\n          ca_file: /etc/istio-certs/root-cert.pem\n
+        \         cert_file: /etc/istio-certs/cert-chain.pem\n          key_file:
+        /etc/istio-certs/key.pem\n          insecure_skip_verify: true  # prometheus
+        does not support secure naming.\n        kubernetes_sd_configs:\n        -
+        role: pod\n        scrape_interval: 15s\n        relabel_configs:\n        -
+        source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]\n          action:
+        keep\n          regex: true\n        # sidecar status annotation is added
+        by sidecar injector and\n        # istio_workload_mtls_ability can be specifically
+        placed on a pod to indicate its ability to receive mtls traffic.\n        -
+        source_labels: [__meta_kubernetes_pod_annotation_sidecar_istio_io_status,
+        __meta_kubernetes_pod_annotation_istio_mtls]\n          action: keep\n          regex:
+        (([^;]+);([^;]*))|(([^;]*);(true))\n        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]\n
+        \         action: drop\n          regex: (http)\n        - source_labels:
+        [__meta_kubernetes_pod_annotation_prometheus_io_path]\n          action: replace\n
+        \         target_label: __metrics_path__\n          regex: (.+)\n        -
+        source_labels: [__address__]  # Only keep address that is host:port\n          action:
+        keep    # otherwise an extra target with ':443' is added for https scheme\n
+        \         regex: ([^:]+):(\\d+)\n        - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]\n
+        \         action: replace\n          regex: ([^:]+)(?::\\d+)?;(\\d+)\n          replacement:
+        $1:$2\n          target_label: __address__\n        - action: labelmap\n          regex:
+        __meta_kubernetes_pod_label_(.+)\n        - source_labels: [__meta_kubernetes_namespace]\n
+        \         action: replace\n          target_label: namespace\n        - source_labels:
+        [__meta_kubernetes_pod_name]\n          action: replace\n          target_label:
+        pod_name\n      - job_name: prometheus\n        static_configs:\n        -
+        targets:\n          - localhost:9090\n      - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token\n
+        \       job_name: kubernetes-apiservers\n        kubernetes_sd_configs:\n
+        \       - role: endpoints\n        relabel_configs:\n        - action: keep\n
+        \         regex: default;kubernetes;https\n          source_labels:\n          -
+        __meta_kubernetes_namespace\n          - __meta_kubernetes_service_name\n
+        \         - __meta_kubernetes_endpoint_port_name\n        scheme: https\n
+        \       tls_config:\n          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt\n
+        \         insecure_skip_verify: true\n      - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token\n
+        \       job_name: kubernetes-nodes\n        kubernetes_sd_configs:\n        -
+        role: node\n        relabel_configs:\n        - action: labelmap\n          regex:
+        __meta_kubernetes_node_label_(.+)\n        - replacement: kubernetes.default.svc:443\n
+        \         target_label: __address__\n        - regex: (.+)\n          replacement:
+        /api/v1/nodes/$1/proxy/metrics\n          source_labels:\n          - __meta_kubernetes_node_name\n
+        \         target_label: __metrics_path__\n        scheme: https\n        tls_config:\n
+        \         ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt\n
+        \         insecure_skip_verify: true\n      - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token\n
+        \       job_name: kubernetes-nodes-cadvisor\n        kubernetes_sd_configs:\n
+        \       - role: node\n        relabel_configs:\n        - action: labelmap\n
+        \         regex: __meta_kubernetes_node_label_(.+)\n        - replacement:
+        kubernetes.default.svc:443\n          target_label: __address__\n        -
+        regex: (.+)\n          replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor\n
+        \         source_labels:\n          - __meta_kubernetes_node_name\n          target_label:
+        __metrics_path__\n        scheme: https\n        tls_config:\n          ca_file:
+        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt\n          insecure_skip_verify:
+        true\n      - honor_labels: true\n        job_name: kubernetes-service-endpoints\n
+        \       kubernetes_sd_configs:\n        - role: endpoints\n        relabel_configs:\n
+        \       - action: keep\n          regex: true\n          source_labels:\n
+        \         - __meta_kubernetes_service_annotation_prometheus_io_scrape\n        -
+        action: drop\n          regex: true\n          source_labels:\n          -
+        __meta_kubernetes_service_annotation_prometheus_io_scrape_slow\n        -
+        action: replace\n          regex: (https?)\n          source_labels:\n          -
+        __meta_kubernetes_service_annotation_prometheus_io_scheme\n          target_label:
+        __scheme__\n        - action: replace\n          regex: (.+)\n          source_labels:\n
+        \         - __meta_kubernetes_service_annotation_prometheus_io_path\n          target_label:
+        __metrics_path__\n        - action: replace\n          regex: (.+?)(?::\\d+)?;(\\d+)\n
+        \         replacement: $1:$2\n          source_labels:\n          - __address__\n
+        \         - __meta_kubernetes_service_annotation_prometheus_io_port\n          target_label:
+        __address__\n        - action: labelmap\n          regex: __meta_kubernetes_service_annotation_prometheus_io_param_(.+)\n
+        \         replacement: __param_$1\n        - action: labelmap\n          regex:
+        __meta_kubernetes_service_label_(.+)\n        - action: replace\n          source_labels:\n
+        \         - __meta_kubernetes_namespace\n          target_label: namespace\n
+        \       - action: replace\n          source_labels:\n          - __meta_kubernetes_service_name\n
+        \         target_label: service\n        - action: replace\n          source_labels:\n
+        \         - __meta_kubernetes_pod_node_name\n          target_label: node\n
+        \     - honor_labels: true\n        job_name: kubernetes-service-endpoints-slow\n
+        \       kubernetes_sd_configs:\n        - role: endpoints\n        relabel_configs:\n
+        \       - action: keep\n          regex: true\n          source_labels:\n
+        \         - __meta_kubernetes_service_annotation_prometheus_io_scrape_slow\n
+        \       - action: replace\n          regex: (https?)\n          source_labels:\n
+        \         - __meta_kubernetes_service_annotation_prometheus_io_scheme\n          target_label:
+        __scheme__\n        - action: replace\n          regex: (.+)\n          source_labels:\n
+        \         - __meta_kubernetes_service_annotation_prometheus_io_path\n          target_label:
+        __metrics_path__\n        - action: replace\n          regex: (.+?)(?::\\d+)?;(\\d+)\n
+        \         replacement: $1:$2\n          source_labels:\n          - __address__\n
+        \         - __meta_kubernetes_service_annotation_prometheus_io_port\n          target_label:
+        __address__\n        - action: labelmap\n          regex: __meta_kubernetes_service_annotation_prometheus_io_param_(.+)\n
+        \         replacement: __param_$1\n        - action: labelmap\n          regex:
+        __meta_kubernetes_service_label_(.+)\n        - action: replace\n          source_labels:\n
+        \         - __meta_kubernetes_namespace\n          target_label: namespace\n
+        \       - action: replace\n          source_labels:\n          - __meta_kubernetes_service_name\n
+        \         target_label: service\n        - action: replace\n          source_labels:\n
+        \         - __meta_kubernetes_pod_node_name\n          target_label: node\n
+        \       scrape_interval: 5m\n        scrape_timeout: 30s\n      - honor_labels:
+        true\n        job_name: prometheus-pushgateway\n        kubernetes_sd_configs:\n
+        \       - role: service\n        relabel_configs:\n        - action: keep\n
+        \         regex: pushgateway\n          source_labels:\n          - __meta_kubernetes_service_annotation_prometheus_io_probe\n
+        \     - honor_labels: true\n        job_name: kubernetes-services\n        kubernetes_sd_configs:\n
+        \       - role: service\n        metrics_path: /probe\n        params:\n          module:\n
+        \         - http_2xx\n        relabel_configs:\n        - action: keep\n          regex:
+        true\n          source_labels:\n          - __meta_kubernetes_service_annotation_prometheus_io_probe\n
+        \       - source_labels:\n          - __address__\n          target_label:
+        __param_target\n        - replacement: blackbox\n          target_label: __address__\n
+        \       - source_labels:\n          - __param_target\n          target_label:
+        instance\n        - action: labelmap\n          regex: __meta_kubernetes_service_label_(.+)\n
+        \       - source_labels:\n          - __meta_kubernetes_namespace\n          target_label:
+        namespace\n        - source_labels:\n          - __meta_kubernetes_service_name\n
+        \         target_label: service\n      - honor_labels: true\n        job_name:
+        kubernetes-pods\n        kubernetes_sd_configs:\n        - role: pod\n        relabel_configs:\n
+        \       - action: keep\n          regex: true\n          source_labels:\n
+        \         - __meta_kubernetes_pod_annotation_prometheus_io_scrape\n        -
+        action: drop\n          regex: true\n          source_labels:\n          -
+        __meta_kubernetes_pod_annotation_prometheus_io_scrape_slow\n        - action:
+        replace\n          regex: (https?)\n          source_labels:\n          -
+        __meta_kubernetes_pod_annotation_prometheus_io_scheme\n          target_label:
+        __scheme__\n        - action: replace\n          regex: (.+)\n          source_labels:\n
+        \         - __meta_kubernetes_pod_annotation_prometheus_io_path\n          target_label:
+        __metrics_path__\n        - action: replace\n          regex: (\\d+);(([A-Fa-f0-9]{1,4}::?){1,7}[A-Fa-f0-9]{1,4})\n
+        \         replacement: '[$2]:$1'\n          source_labels:\n          - __meta_kubernetes_pod_annotation_prometheus_io_port\n
+        \         - __meta_kubernetes_pod_ip\n          target_label: __address__\n
+        \       - action: replace\n          regex: (\\d+);((([0-9]+?)(\\.|$)){4})\n
+        \         replacement: $2:$1\n          source_labels:\n          - __meta_kubernetes_pod_annotation_prometheus_io_port\n
+        \         - __meta_kubernetes_pod_ip\n          target_label: __address__\n
+        \       - action: labelmap\n          regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)\n
+        \         replacement: __param_$1\n        - action: labelmap\n          regex:
+        __meta_kubernetes_pod_label_(.+)\n        - action: replace\n          source_labels:\n
+        \         - __meta_kubernetes_namespace\n          target_label: namespace\n
+        \       - action: replace\n          source_labels:\n          - __meta_kubernetes_pod_name\n
+        \         target_label: pod\n        - action: drop\n          regex: Pending|Succeeded|Failed|Completed\n
+        \         source_labels:\n          - __meta_kubernetes_pod_phase\n        -
+        action: replace\n          source_labels:\n          - __meta_kubernetes_pod_node_name\n
+        \         target_label: node\n      - honor_labels: true\n        job_name:
+        kubernetes-pods-slow\n        kubernetes_sd_configs:\n        - role: pod\n
+        \       relabel_configs:\n        - action: keep\n          regex: true\n
+        \         source_labels:\n          - __meta_kubernetes_pod_annotation_prometheus_io_scrape_slow\n
+        \       - action: replace\n          regex: (https?)\n          source_labels:\n
+        \         - __meta_kubernetes_pod_annotation_prometheus_io_scheme\n          target_label:
+        __scheme__\n        - action: replace\n          regex: (.+)\n          source_labels:\n
+        \         - __meta_kubernetes_pod_annotation_prometheus_io_path\n          target_label:
+        __metrics_path__\n        - action: replace\n          regex: (\\d+);(([A-Fa-f0-9]{1,4}::?){1,7}[A-Fa-f0-9]{1,4})\n
+        \         replacement: '[$2]:$1'\n          source_labels:\n          - __meta_kubernetes_pod_annotation_prometheus_io_port\n
+        \         - __meta_kubernetes_pod_ip\n          target_label: __address__\n
+        \       - action: replace\n          regex: (\\d+);((([0-9]+?)(\\.|$)){4})\n
+        \         replacement: $2:$1\n          source_labels:\n          - __meta_kubernetes_pod_annotation_prometheus_io_port\n
+        \         - __meta_kubernetes_pod_ip\n          target_label: __address__\n
+        \       - action: labelmap\n          regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)\n
+        \         replacement: __param_$1\n        - action: labelmap\n          regex:
+        __meta_kubernetes_pod_label_(.+)\n        - action: replace\n          source_labels:\n
+        \         - __meta_kubernetes_namespace\n          target_label: namespace\n
+        \       - action: replace\n          source_labels:\n          - __meta_kubernetes_pod_name\n
+        \         target_label: pod\n        - action: drop\n          regex: Pending|Succeeded|Failed|Completed\n
+        \         source_labels:\n          - __meta_kubernetes_pod_phase\n        -
+        action: replace\n          source_labels:\n          - __meta_kubernetes_pod_node_name\n
+        \         target_label: node\n        scrape_interval: 5m\n        scrape_timeout:
+        30s"
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 65.2.0
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
+    - Validate=false
+    - RespectIgnoreDifferences=true
+status:
+  controllerNamespace: argocd
+  health:
+    status: Healthy
+  history:
+  - deployStartedAt: "2024-10-15T10:42:18Z"
+    deployedAt: "2024-10-15T10:49:58Z"
+    id: 0
+    initiatedBy:
+      automated: true
+    revision: 65.2.0
+    source:
+      chart: kube-prometheus-stack
+      helm:
+        valueFiles:
+        - values.yaml
+        values: "grafana:\n  persistence:\n    enabled: true\n    size: 5Gi\n  adminPassword:
+          \"qwer1234!\"\n  ingress:\n    enabled: false\n    ingressClassName: nginx\n
+          \   annotations: \n      istio: aaa \n    labels: {}\n    hosts: \n      -
+          grafana.srrain.store\n    path: /\n\n    # tls: \n    #   - secretName:
+          grafana-general-tls\n    #     hosts:\n    #     - grafana.srrain.store\n
+          \ dashboards:\n    default:\n      istio-control-plane-dashboard:\n        gnetId:
+          7645\n        revision: 231\n        datasource: Prometheus\n      istio-mesh-dashboard:\n
+          \       gnetId: 7639\n        revision: 231\n        datasource: Prometheus\n
+          \     istio-performance-dashboard:\n        gnetId: 12153\n        revision:
+          231\n        datasource: Prometheus\n      istio-service-dashboard:\n        gnetId:
+          7636\n        revision: 231\n        datasource: Prometheus\n      istio-wasm-extension-dashboard:\n
+          \       gnetId: 13277\n        revision: 188\n        datasource: Prometheus\n
+          \     istio-workload-dashboard:\n        gnetId: 7630\n        revision:
+          231\n        datasource: Prometheus\n\n  #datasource에 pvc가 안 붙어 있어서 휘발되기에
+          미리 정의\n  additionalDataSources: \n  - name: Tempo\n    type: tempo\n    typeName:
+          Tempo\n    access: proxy\n    url: http://tempo.tracing.svc:3100\n    password:
+          ''\n    user: ''\n    database: ''\n    basicAuth: false\n    isDefault:
+          false\n    jsonData:\n    nodeGraph:\n      enabled: true\n    tracesToLogs:\n
+          \     datasourceUid: loki\n      filterBySpanID: false\n      filterByTraceID:
+          true\n      mapTagNamesEnabled: false\n      tags:\n          - compose_service\n
+          \   readOnly: false\n    editable: true\n  - name: loki\n    type: loki\n
+          \   uid: \n    url: http://loki-distributed-gateway.logging.svc\n    access:
+          proxy\n    basicAuth: false\n    jsonData:\n      serviceMap:\n        datasourceUid:
+          'prometheus'\n\nprometheus:      \n  additionalServiceMonitors:\n    - name:
+          \"istio-component-monitor\"\n      additionalLabels:\n        monitoring:
+          istio-components\n        release: istio\n      jobLabel: \"istio\"\n      targetLabels:\n
+          \       - app\n      selector:\n        matchExpressions:\n          - {key:
+          istio, operator: In, values: [pilot]}\n      namespaceSelector:\n        any:
+          true\n      endpoints:\n        - port: http-monitoring\n          interval:
+          15s\n\n  additionalPodMonitors:\n    - name: \"envoy-stats-monitor\"\n      additionalLabels:\n
+          \       monitoring: istio-proxies\n        release: istio\n      jobLabel:
+          \"envoy-stats\"\n      selector:\n        matchExpressions:\n          -
+          {key: istio-prometheus-ignore, operator: DoesNotExist}\n      podTargetLabels:
+          {}\n      sampleLimit: 0\n      namespaceSelector:\n        any: true\n
+          \       matchNames: []\n      podMetricsEndpoints:\n        - path: /stats/prometheus\n
+          \         interval: 15s\n          relabelings:\n            - action: keep\n
+          \             sourceLabels: [__meta_kubernetes_pod_container_name]\n              regex:
+          \"istio-proxy\"\n            - action: keep\n              sourceLabels:
+          [__meta_kubernetes_pod_annotationpresent_prometheus_io_scrape]\n            -
+          sourceLabels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]\n
+          \             action: replace\n              regex: ([^:]+)(?::\\d+)?;(\\d+)\n
+          \             replacement: $1:$2\n              targetLabel: __address__\n
+          \           - action: labeldrop\n              regex: \"__meta_kubernetes_pod_label_(.+)\"\n
+          \           - sourceLabels: [__meta_kubernetes_namespace]\n              action:
+          replace\n              targetLabel: namespace\n            - sourceLabels:
+          [__meta_kubernetes_pod_name]\n              action: replace\n              targetLabel:
+          pod_name\n\n  prometheusSpec:\n    enableRemoteWriteReceiver: true\n    #Tempo에서
+          Service Graph 그리기 위해 외부 접근 활성화\n    # dashboard가 휘발성이라 pvc mount\n    storageSpec:\n
+          \     volumeClaimTemplate:\n        spec:\n          accessModes: [\"ReadWriteOnce\"]\n
+          \         resources:\n            requests:\n              storage: 5Gi\n\n
+          \   volumeMounts:\n    - mountPath: /etc/istio-certs\n      name: istio-certs\n
+          \   volumes:\n    - name: istio-certs\n      secret:\n        defaultMode:
+          420\n        optional: true\n        secretName: istio-ca-secret\n    additionalScrapeConfigs:\n
+          \     - job_name: 'otel-collector'\n        scrape_interval: 10s\n        static_configs:\n
+          \         - targets: ['otel-collector.otel.svc:8889']\n          - targets:
+          ['otel-collector.otel.svc:8888']\n      - job_name: 'kubernetes-pods-istio-secure'\n
+          \       scheme: https\n        tls_config:\n          ca_file: /etc/istio-certs/root-cert.pem\n
+          \         cert_file: /etc/istio-certs/cert-chain.pem\n          key_file:
+          /etc/istio-certs/key.pem\n          insecure_skip_verify: true  # prometheus
+          does not support secure naming.\n        kubernetes_sd_configs:\n        -
+          role: pod\n        scrape_interval: 15s\n        relabel_configs:\n        -
+          source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]\n
+          \         action: keep\n          regex: true\n        # sidecar status
+          annotation is added by sidecar injector and\n        # istio_workload_mtls_ability
+          can be specifically placed on a pod to indicate its ability to receive mtls
+          traffic.\n        - source_labels: [__meta_kubernetes_pod_annotation_sidecar_istio_io_status,
+          __meta_kubernetes_pod_annotation_istio_mtls]\n          action: keep\n          regex:
+          (([^;]+);([^;]*))|(([^;]*);(true))\n        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]\n
+          \         action: drop\n          regex: (http)\n        - source_labels:
+          [__meta_kubernetes_pod_annotation_prometheus_io_path]\n          action:
+          replace\n          target_label: __metrics_path__\n          regex: (.+)\n
+          \       - source_labels: [__address__]  # Only keep address that is host:port\n
+          \         action: keep    # otherwise an extra target with ':443' is added
+          for https scheme\n          regex: ([^:]+):(\\d+)\n        - source_labels:
+          [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]\n          action:
+          replace\n          regex: ([^:]+)(?::\\d+)?;(\\d+)\n          replacement:
+          $1:$2\n          target_label: __address__\n        - action: labelmap\n
+          \         regex: __meta_kubernetes_pod_label_(.+)\n        - source_labels:
+          [__meta_kubernetes_namespace]\n          action: replace\n          target_label:
+          namespace\n        - source_labels: [__meta_kubernetes_pod_name]\n          action:
+          replace\n          target_label: pod_name\n      - job_name: prometheus\n
+          \       static_configs:\n        - targets:\n          - localhost:9090\n
+          \     - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token\n
+          \       job_name: kubernetes-apiservers\n        kubernetes_sd_configs:\n
+          \       - role: endpoints\n        relabel_configs:\n        - action: keep\n
+          \         regex: default;kubernetes;https\n          source_labels:\n          -
+          __meta_kubernetes_namespace\n          - __meta_kubernetes_service_name\n
+          \         - __meta_kubernetes_endpoint_port_name\n        scheme: https\n
+          \       tls_config:\n          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt\n
+          \         insecure_skip_verify: true\n      - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token\n
+          \       job_name: kubernetes-nodes\n        kubernetes_sd_configs:\n        -
+          role: node\n        relabel_configs:\n        - action: labelmap\n          regex:
+          __meta_kubernetes_node_label_(.+)\n        - replacement: kubernetes.default.svc:443\n
+          \         target_label: __address__\n        - regex: (.+)\n          replacement:
+          /api/v1/nodes/$1/proxy/metrics\n          source_labels:\n          - __meta_kubernetes_node_name\n
+          \         target_label: __metrics_path__\n        scheme: https\n        tls_config:\n
+          \         ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt\n
+          \         insecure_skip_verify: true\n      - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token\n
+          \       job_name: kubernetes-nodes-cadvisor\n        kubernetes_sd_configs:\n
+          \       - role: node\n        relabel_configs:\n        - action: labelmap\n
+          \         regex: __meta_kubernetes_node_label_(.+)\n        - replacement:
+          kubernetes.default.svc:443\n          target_label: __address__\n        -
+          regex: (.+)\n          replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor\n
+          \         source_labels:\n          - __meta_kubernetes_node_name\n          target_label:
+          __metrics_path__\n        scheme: https\n        tls_config:\n          ca_file:
+          /var/run/secrets/kubernetes.io/serviceaccount/ca.crt\n          insecure_skip_verify:
+          true\n      - honor_labels: true\n        job_name: kubernetes-service-endpoints\n
+          \       kubernetes_sd_configs:\n        - role: endpoints\n        relabel_configs:\n
+          \       - action: keep\n          regex: true\n          source_labels:\n
+          \         - __meta_kubernetes_service_annotation_prometheus_io_scrape\n
+          \       - action: drop\n          regex: true\n          source_labels:\n
+          \         - __meta_kubernetes_service_annotation_prometheus_io_scrape_slow\n
+          \       - action: replace\n          regex: (https?)\n          source_labels:\n
+          \         - __meta_kubernetes_service_annotation_prometheus_io_scheme\n
+          \         target_label: __scheme__\n        - action: replace\n          regex:
+          (.+)\n          source_labels:\n          - __meta_kubernetes_service_annotation_prometheus_io_path\n
+          \         target_label: __metrics_path__\n        - action: replace\n          regex:
+          (.+?)(?::\\d+)?;(\\d+)\n          replacement: $1:$2\n          source_labels:\n
+          \         - __address__\n          - __meta_kubernetes_service_annotation_prometheus_io_port\n
+          \         target_label: __address__\n        - action: labelmap\n          regex:
+          __meta_kubernetes_service_annotation_prometheus_io_param_(.+)\n          replacement:
+          __param_$1\n        - action: labelmap\n          regex: __meta_kubernetes_service_label_(.+)\n
+          \       - action: replace\n          source_labels:\n          - __meta_kubernetes_namespace\n
+          \         target_label: namespace\n        - action: replace\n          source_labels:\n
+          \         - __meta_kubernetes_service_name\n          target_label: service\n
+          \       - action: replace\n          source_labels:\n          - __meta_kubernetes_pod_node_name\n
+          \         target_label: node\n      - honor_labels: true\n        job_name:
+          kubernetes-service-endpoints-slow\n        kubernetes_sd_configs:\n        -
+          role: endpoints\n        relabel_configs:\n        - action: keep\n          regex:
+          true\n          source_labels:\n          - __meta_kubernetes_service_annotation_prometheus_io_scrape_slow\n
+          \       - action: replace\n          regex: (https?)\n          source_labels:\n
+          \         - __meta_kubernetes_service_annotation_prometheus_io_scheme\n
+          \         target_label: __scheme__\n        - action: replace\n          regex:
+          (.+)\n          source_labels:\n          - __meta_kubernetes_service_annotation_prometheus_io_path\n
+          \         target_label: __metrics_path__\n        - action: replace\n          regex:
+          (.+?)(?::\\d+)?;(\\d+)\n          replacement: $1:$2\n          source_labels:\n
+          \         - __address__\n          - __meta_kubernetes_service_annotation_prometheus_io_port\n
+          \         target_label: __address__\n        - action: labelmap\n          regex:
+          __meta_kubernetes_service_annotation_prometheus_io_param_(.+)\n          replacement:
+          __param_$1\n        - action: labelmap\n          regex: __meta_kubernetes_service_label_(.+)\n
+          \       - action: replace\n          source_labels:\n          - __meta_kubernetes_namespace\n
+          \         target_label: namespace\n        - action: replace\n          source_labels:\n
+          \         - __meta_kubernetes_service_name\n          target_label: service\n
+          \       - action: replace\n          source_labels:\n          - __meta_kubernetes_pod_node_name\n
+          \         target_label: node\n        scrape_interval: 5m\n        scrape_timeout:
+          30s\n      - honor_labels: true\n        job_name: prometheus-pushgateway\n
+          \       kubernetes_sd_configs:\n        - role: service\n        relabel_configs:\n
+          \       - action: keep\n          regex: pushgateway\n          source_labels:\n
+          \         - __meta_kubernetes_service_annotation_prometheus_io_probe\n      -
+          honor_labels: true\n        job_name: kubernetes-services\n        kubernetes_sd_configs:\n
+          \       - role: service\n        metrics_path: /probe\n        params:\n
+          \         module:\n          - http_2xx\n        relabel_configs:\n        -
+          action: keep\n          regex: true\n          source_labels:\n          -
+          __meta_kubernetes_service_annotation_prometheus_io_probe\n        - source_labels:\n
+          \         - __address__\n          target_label: __param_target\n        -
+          replacement: blackbox\n          target_label: __address__\n        - source_labels:\n
+          \         - __param_target\n          target_label: instance\n        -
+          action: labelmap\n          regex: __meta_kubernetes_service_label_(.+)\n
+          \       - source_labels:\n          - __meta_kubernetes_namespace\n          target_label:
+          namespace\n        - source_labels:\n          - __meta_kubernetes_service_name\n
+          \         target_label: service\n      - honor_labels: true\n        job_name:
+          kubernetes-pods\n        kubernetes_sd_configs:\n        - role: pod\n        relabel_configs:\n
+          \       - action: keep\n          regex: true\n          source_labels:\n
+          \         - __meta_kubernetes_pod_annotation_prometheus_io_scrape\n        -
+          action: drop\n          regex: true\n          source_labels:\n          -
+          __meta_kubernetes_pod_annotation_prometheus_io_scrape_slow\n        - action:
+          replace\n          regex: (https?)\n          source_labels:\n          -
+          __meta_kubernetes_pod_annotation_prometheus_io_scheme\n          target_label:
+          __scheme__\n        - action: replace\n          regex: (.+)\n          source_labels:\n
+          \         - __meta_kubernetes_pod_annotation_prometheus_io_path\n          target_label:
+          __metrics_path__\n        - action: replace\n          regex: (\\d+);(([A-Fa-f0-9]{1,4}::?){1,7}[A-Fa-f0-9]{1,4})\n
+          \         replacement: '[$2]:$1'\n          source_labels:\n          -
+          __meta_kubernetes_pod_annotation_prometheus_io_port\n          - __meta_kubernetes_pod_ip\n
+          \         target_label: __address__\n        - action: replace\n          regex:
+          (\\d+);((([0-9]+?)(\\.|$)){4})\n          replacement: $2:$1\n          source_labels:\n
+          \         - __meta_kubernetes_pod_annotation_prometheus_io_port\n          -
+          __meta_kubernetes_pod_ip\n          target_label: __address__\n        -
+          action: labelmap\n          regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)\n
+          \         replacement: __param_$1\n        - action: labelmap\n          regex:
+          __meta_kubernetes_pod_label_(.+)\n        - action: replace\n          source_labels:\n
+          \         - __meta_kubernetes_namespace\n          target_label: namespace\n
+          \       - action: replace\n          source_labels:\n          - __meta_kubernetes_pod_name\n
+          \         target_label: pod\n        - action: drop\n          regex: Pending|Succeeded|Failed|Completed\n
+          \         source_labels:\n          - __meta_kubernetes_pod_phase\n        -
+          action: replace\n          source_labels:\n          - __meta_kubernetes_pod_node_name\n
+          \         target_label: node\n      - honor_labels: true\n        job_name:
+          kubernetes-pods-slow\n        kubernetes_sd_configs:\n        - role: pod\n
+          \       relabel_configs:\n        - action: keep\n          regex: true\n
+          \         source_labels:\n          - __meta_kubernetes_pod_annotation_prometheus_io_scrape_slow\n
+          \       - action: replace\n          regex: (https?)\n          source_labels:\n
+          \         - __meta_kubernetes_pod_annotation_prometheus_io_scheme\n          target_label:
+          __scheme__\n        - action: replace\n          regex: (.+)\n          source_labels:\n
+          \         - __meta_kubernetes_pod_annotation_prometheus_io_path\n          target_label:
+          __metrics_path__\n        - action: replace\n          regex: (\\d+);(([A-Fa-f0-9]{1,4}::?){1,7}[A-Fa-f0-9]{1,4})\n
+          \         replacement: '[$2]:$1'\n          source_labels:\n          -
+          __meta_kubernetes_pod_annotation_prometheus_io_port\n          - __meta_kubernetes_pod_ip\n
+          \         target_label: __address__\n        - action: replace\n          regex:
+          (\\d+);((([0-9]+?)(\\.|$)){4})\n          replacement: $2:$1\n          source_labels:\n
+          \         - __meta_kubernetes_pod_annotation_prometheus_io_port\n          -
+          __meta_kubernetes_pod_ip\n          target_label: __address__\n        -
+          action: labelmap\n          regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)\n
+          \         replacement: __param_$1\n        - action: labelmap\n          regex:
+          __meta_kubernetes_pod_label_(.+)\n        - action: replace\n          source_labels:\n
+          \         - __meta_kubernetes_namespace\n          target_label: namespace\n
+          \       - action: replace\n          source_labels:\n          - __meta_kubernetes_pod_name\n
+          \         target_label: pod\n        - action: drop\n          regex: Pending|Succeeded|Failed|Completed\n
+          \         source_labels:\n          - __meta_kubernetes_pod_phase\n        -
+          action: replace\n          source_labels:\n          - __meta_kubernetes_pod_node_name\n
+          \         target_label: node\n        scrape_interval: 5m\n        scrape_timeout:
+          30s"
+      repoURL: https://prometheus-community.github.io/helm-charts
+      targetRevision: 65.2.0
+  operationState:
+    finishedAt: "2024-10-15T10:49:59Z"
+    message: successfully synced (no more tasks)
+    operation:
+      initiatedBy:
+        automated: true
+      retry:
+        limit: 5
+      sync:
+        revision: 65.2.0
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true
+        - Validate=false
+        - RespectIgnoreDifferences=true
+    phase: Succeeded
+    retryCount: 4
+    startedAt: "2024-10-15T10:42:18Z"
+    syncResult:
+      resources:
+      - group: ""
+        hookPhase: Succeeded
+        hookType: PreSync
+        kind: ServiceAccount
+        message: kube-prometheus-stack-admission created
+        name: kube-prometheus-stack-admission
+        namespace: istio-system
+        syncPhase: PreSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PreSync
+        kind: ClusterRole
+        message: kube-prometheus-stack-admission created
+        name: kube-prometheus-stack-admission
+        namespace: istio-system
+        syncPhase: PreSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PreSync
+        kind: ClusterRoleBinding
+        message: kube-prometheus-stack-admission created
+        name: kube-prometheus-stack-admission
+        namespace: istio-system
+        syncPhase: PreSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PreSync
+        kind: Role
+        message: kube-prometheus-stack-admission created
+        name: kube-prometheus-stack-admission
+        namespace: istio-system
+        syncPhase: PreSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PreSync
+        kind: RoleBinding
+        message: kube-prometheus-stack-admission created
+        name: kube-prometheus-stack-admission
+        namespace: istio-system
+        syncPhase: PreSync
+        version: v1
+      - group: batch
+        hookPhase: Succeeded
+        hookType: PreSync
+        kind: Job
+        message: job.batch/kube-prometheus-stack-admission-create serverside-applied
+        name: kube-prometheus-stack-admission-create
+        namespace: istio-system
+        syncPhase: PreSync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ServiceAccount
+        message: serviceaccount/kube-prometheus-stack-kube-state-metrics serverside-applied
+        name: kube-prometheus-stack-kube-state-metrics
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ServiceAccount
+        message: serviceaccount/kube-prometheus-stack-operator serverside-applied
+        name: kube-prometheus-stack-operator
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ServiceAccount
+        message: serviceaccount/kube-prometheus-stack-prometheus serverside-applied
+        name: kube-prometheus-stack-prometheus
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ServiceAccount
+        message: serviceaccount/kube-prometheus-stack-grafana serverside-applied
+        name: kube-prometheus-stack-grafana
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ServiceAccount
+        message: serviceaccount/kube-prometheus-stack-prometheus-node-exporter serverside-applied
+        name: kube-prometheus-stack-prometheus-node-exporter
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ServiceAccount
+        message: serviceaccount/kube-prometheus-stack-alertmanager serverside-applied
+        name: kube-prometheus-stack-alertmanager
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Secret
+        message: secret/kube-prometheus-stack-grafana serverside-applied
+        name: kube-prometheus-stack-grafana
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Secret
+        message: secret/alertmanager-kube-prometheus-stack-alertmanager serverside-applied
+        name: alertmanager-kube-prometheus-stack-alertmanager
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Secret
+        message: secret/kube-prometheus-stack-prometheus-scrape-confg serverside-applied
+        name: kube-prometheus-stack-prometheus-scrape-confg
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-grafana-dashboards-default serverside-applied
+        name: kube-prometheus-stack-grafana-dashboards-default
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-grafana-config-dashboards serverside-applied
+        name: kube-prometheus-stack-grafana-config-dashboards
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-grafana serverside-applied
+        name: kube-prometheus-stack-grafana
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-grafana-datasource serverside-applied
+        name: kube-prometheus-stack-grafana-datasource
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-node-cluster-rsrc-use serverside-applied
+        name: kube-prometheus-stack-node-cluster-rsrc-use
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-k8s-resources-multicluster serverside-applied
+        name: kube-prometheus-stack-k8s-resources-multicluster
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-proxy serverside-applied
+        name: kube-prometheus-stack-proxy
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-controller-manager serverside-applied
+        name: kube-prometheus-stack-controller-manager
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-pod-total serverside-applied
+        name: kube-prometheus-stack-pod-total
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-etcd serverside-applied
+        name: kube-prometheus-stack-etcd
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-workload-total serverside-applied
+        name: kube-prometheus-stack-workload-total
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-k8s-resources-cluster serverside-applied
+        name: kube-prometheus-stack-k8s-resources-cluster
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-alertmanager-overview serverside-applied
+        name: kube-prometheus-stack-alertmanager-overview
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-k8s-resources-namespace serverside-applied
+        name: kube-prometheus-stack-k8s-resources-namespace
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-apiserver serverside-applied
+        name: kube-prometheus-stack-apiserver
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-cluster-total serverside-applied
+        name: kube-prometheus-stack-cluster-total
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-kubelet serverside-applied
+        name: kube-prometheus-stack-kubelet
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-k8s-resources-node serverside-applied
+        name: kube-prometheus-stack-k8s-resources-node
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-scheduler serverside-applied
+        name: kube-prometheus-stack-scheduler
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-grafana-overview serverside-applied
+        name: kube-prometheus-stack-grafana-overview
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-k8s-resources-pod serverside-applied
+        name: kube-prometheus-stack-k8s-resources-pod
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-k8s-coredns serverside-applied
+        name: kube-prometheus-stack-k8s-coredns
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-node-rsrc-use serverside-applied
+        name: kube-prometheus-stack-node-rsrc-use
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-nodes serverside-applied
+        name: kube-prometheus-stack-nodes
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-k8s-resources-workloads-namespace
+          serverside-applied
+        name: kube-prometheus-stack-k8s-resources-workloads-namespace
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-prometheus serverside-applied
+        name: kube-prometheus-stack-prometheus
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-persistentvolumesusage serverside-applied
+        name: kube-prometheus-stack-persistentvolumesusage
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-namespace-by-workload serverside-applied
+        name: kube-prometheus-stack-namespace-by-workload
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-k8s-resources-workload serverside-applied
+        name: kube-prometheus-stack-k8s-resources-workload
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-nodes-darwin serverside-applied
+        name: kube-prometheus-stack-nodes-darwin
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-nodes-aix serverside-applied
+        name: kube-prometheus-stack-nodes-aix
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: ConfigMap
+        message: configmap/kube-prometheus-stack-namespace-by-pod serverside-applied
+        name: kube-prometheus-stack-namespace-by-pod
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: PersistentVolumeClaim
+        message: persistentvolumeclaim/kube-prometheus-stack-grafana serverside-applied
+        name: kube-prometheus-stack-grafana
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Succeeded
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/prometheusrules.monitoring.coreos.com
+          serverside-applied
+        name: prometheusrules.monitoring.coreos.com
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Succeeded
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/servicemonitors.monitoring.coreos.com
+          serverside-applied
+        name: servicemonitors.monitoring.coreos.com
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Succeeded
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/podmonitors.monitoring.coreos.com
+          serverside-applied
+        name: podmonitors.monitoring.coreos.com
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Succeeded
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/probes.monitoring.coreos.com
+          serverside-applied
+        name: probes.monitoring.coreos.com
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Succeeded
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/alertmanagers.monitoring.coreos.com
+          serverside-applied
+        name: alertmanagers.monitoring.coreos.com
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Succeeded
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/thanosrulers.monitoring.coreos.com
+          serverside-applied
+        name: thanosrulers.monitoring.coreos.com
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Succeeded
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/alertmanagerconfigs.monitoring.coreos.com
+          serverside-applied
+        name: alertmanagerconfigs.monitoring.coreos.com
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Succeeded
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/scrapeconfigs.monitoring.coreos.com
+          serverside-applied
+        name: scrapeconfigs.monitoring.coreos.com
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Succeeded
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/prometheusagents.monitoring.coreos.com
+          serverside-applied
+        name: prometheusagents.monitoring.coreos.com
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiextensions.k8s.io
+        hookPhase: Succeeded
+        kind: CustomResourceDefinition
+        message: customresourcedefinition.apiextensions.k8s.io/prometheuses.monitoring.coreos.com
+          serverside-applied
+        name: prometheuses.monitoring.coreos.com
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        kind: ClusterRole
+        message: clusterrole.rbac.authorization.k8s.io/kube-prometheus-stack-grafana-clusterrole
+          reconciled. clusterrole.rbac.authorization.k8s.io/kube-prometheus-stack-grafana-clusterrole
+          serverside-applied
+        name: kube-prometheus-stack-grafana-clusterrole
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        kind: ClusterRole
+        message: clusterrole.rbac.authorization.k8s.io/kube-prometheus-stack-prometheus
+          reconciled. clusterrole.rbac.authorization.k8s.io/kube-prometheus-stack-prometheus
+          serverside-applied
+        name: kube-prometheus-stack-prometheus
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        kind: ClusterRole
+        message: clusterrole.rbac.authorization.k8s.io/kube-prometheus-stack-operator
+          reconciled. clusterrole.rbac.authorization.k8s.io/kube-prometheus-stack-operator
+          serverside-applied
+        name: kube-prometheus-stack-operator
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        kind: ClusterRole
+        message: clusterrole.rbac.authorization.k8s.io/kube-prometheus-stack-kube-state-metrics
+          reconciled. clusterrole.rbac.authorization.k8s.io/kube-prometheus-stack-kube-state-metrics
+          serverside-applied
+        name: kube-prometheus-stack-kube-state-metrics
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        kind: ClusterRoleBinding
+        message: clusterrolebinding.rbac.authorization.k8s.io/kube-prometheus-stack-prometheus
+          reconciled. clusterrolebinding.rbac.authorization.k8s.io/kube-prometheus-stack-prometheus
+          serverside-applied
+        name: kube-prometheus-stack-prometheus
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        kind: ClusterRoleBinding
+        message: clusterrolebinding.rbac.authorization.k8s.io/kube-prometheus-stack-operator
+          reconciled. clusterrolebinding.rbac.authorization.k8s.io/kube-prometheus-stack-operator
+          serverside-applied
+        name: kube-prometheus-stack-operator
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        kind: ClusterRoleBinding
+        message: clusterrolebinding.rbac.authorization.k8s.io/kube-prometheus-stack-grafana-clusterrolebinding
+          reconciled. clusterrolebinding.rbac.authorization.k8s.io/kube-prometheus-stack-grafana-clusterrolebinding
+          serverside-applied
+        name: kube-prometheus-stack-grafana-clusterrolebinding
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        kind: ClusterRoleBinding
+        message: clusterrolebinding.rbac.authorization.k8s.io/kube-prometheus-stack-kube-state-metrics
+          reconciled. clusterrolebinding.rbac.authorization.k8s.io/kube-prometheus-stack-kube-state-metrics
+          serverside-applied
+        name: kube-prometheus-stack-kube-state-metrics
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        kind: Role
+        message: role.rbac.authorization.k8s.io/kube-prometheus-stack-grafana reconciled.
+          role.rbac.authorization.k8s.io/kube-prometheus-stack-grafana serverside-applied
+        name: kube-prometheus-stack-grafana
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        kind: RoleBinding
+        message: rolebinding.rbac.authorization.k8s.io/kube-prometheus-stack-grafana
+          reconciled. rolebinding.rbac.authorization.k8s.io/kube-prometheus-stack-grafana
+          serverside-applied
+        name: kube-prometheus-stack-grafana
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Service
+        message: service/kube-prometheus-stack-coredns serverside-applied
+        name: kube-prometheus-stack-coredns
+        namespace: kube-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Service
+        message: service/kube-prometheus-stack-kube-scheduler serverside-applied
+        name: kube-prometheus-stack-kube-scheduler
+        namespace: kube-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Service
+        message: service/kube-prometheus-stack-kube-proxy serverside-applied
+        name: kube-prometheus-stack-kube-proxy
+        namespace: kube-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Service
+        message: service/kube-prometheus-stack-operator serverside-applied
+        name: kube-prometheus-stack-operator
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Service
+        message: service/kube-prometheus-stack-prometheus serverside-applied
+        name: kube-prometheus-stack-prometheus
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Service
+        message: service/kube-prometheus-stack-kube-state-metrics serverside-applied
+        name: kube-prometheus-stack-kube-state-metrics
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Service
+        message: service/kube-prometheus-stack-kube-controller-manager serverside-applied
+        name: kube-prometheus-stack-kube-controller-manager
+        namespace: kube-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Service
+        message: service/kube-prometheus-stack-alertmanager serverside-applied
+        name: kube-prometheus-stack-alertmanager
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Service
+        message: service/kube-prometheus-stack-grafana serverside-applied
+        name: kube-prometheus-stack-grafana
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Service
+        message: service/kube-prometheus-stack-prometheus-node-exporter serverside-applied
+        name: kube-prometheus-stack-prometheus-node-exporter
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        kind: Service
+        message: service/kube-prometheus-stack-kube-etcd serverside-applied
+        name: kube-prometheus-stack-kube-etcd
+        namespace: kube-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apps
+        hookPhase: Succeeded
+        kind: DaemonSet
+        message: daemonset.apps/kube-prometheus-stack-prometheus-node-exporter serverside-applied
+        name: kube-prometheus-stack-prometheus-node-exporter
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apps
+        hookPhase: Succeeded
+        kind: Deployment
+        message: deployment.apps/kube-prometheus-stack-operator serverside-applied
+        name: kube-prometheus-stack-operator
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apps
+        hookPhase: Succeeded
+        kind: Deployment
+        message: deployment.apps/kube-prometheus-stack-kube-state-metrics serverside-applied
+        name: kube-prometheus-stack-kube-state-metrics
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apps
+        hookPhase: Succeeded
+        kind: Deployment
+        message: deployment.apps/kube-prometheus-stack-grafana serverside-applied
+        name: kube-prometheus-stack-grafana
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PodMonitor
+        message: podmonitor.monitoring.coreos.com/envoy-stats-monitor serverside-applied
+        name: envoy-stats-monitor
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: ServiceMonitor
+        message: servicemonitor.monitoring.coreos.com/istio-component-monitor serverside-applied
+        name: istio-component-monitor
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: admissionregistration.k8s.io
+        hookPhase: Succeeded
+        kind: MutatingWebhookConfiguration
+        message: mutatingwebhookconfiguration.admissionregistration.k8s.io/kube-prometheus-stack-admission
+          serverside-applied
+        name: kube-prometheus-stack-admission
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: admissionregistration.k8s.io
+        hookPhase: Succeeded
+        kind: ValidatingWebhookConfiguration
+        message: validatingwebhookconfiguration.admissionregistration.k8s.io/kube-prometheus-stack-admission
+          serverside-applied
+        name: kube-prometheus-stack-admission
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: Alertmanager
+        message: alertmanager.monitoring.coreos.com/kube-prometheus-stack-alertmanager
+          serverside-applied
+        name: kube-prometheus-stack-alertmanager
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: ServiceMonitor
+        message: servicemonitor.monitoring.coreos.com/kube-prometheus-stack-alertmanager
+          serverside-applied
+        name: kube-prometheus-stack-alertmanager
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-alertmanager.rules
+          serverside-applied
+        name: kube-prometheus-stack-alertmanager.rules
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: ServiceMonitor
+        message: servicemonitor.monitoring.coreos.com/kube-prometheus-stack-apiserver
+          serverside-applied
+        name: kube-prometheus-stack-apiserver
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-config-reloaders
+          serverside-applied
+        name: kube-prometheus-stack-config-reloaders
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: ServiceMonitor
+        message: servicemonitor.monitoring.coreos.com/kube-prometheus-stack-coredns
+          serverside-applied
+        name: kube-prometheus-stack-coredns
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-general.rules
+          serverside-applied
+        name: kube-prometheus-stack-general.rules
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-etcd serverside-applied
+        name: kube-prometheus-stack-etcd
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: ServiceMonitor
+        message: servicemonitor.monitoring.coreos.com/kube-prometheus-stack-grafana
+          serverside-applied
+        name: kube-prometheus-stack-grafana
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-k8s.rules.container-memory-swap
+          serverside-applied
+        name: kube-prometheus-stack-k8s.rules.container-memory-swap
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-k8s.rules.container-resource
+          serverside-applied
+        name: kube-prometheus-stack-k8s.rules.container-resource
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-k8s.rules.container-memory-rss
+          serverside-applied
+        name: kube-prometheus-stack-k8s.rules.container-memory-rss
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-k8s.rules.container-memory-cache
+          serverside-applied
+        name: kube-prometheus-stack-k8s.rules.container-memory-cache
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-k8s.rules.container-memory-working-set-by
+          serverside-applied
+        name: kube-prometheus-stack-k8s.rules.container-memory-working-set-by
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kube-apiserver-slos
+          serverside-applied
+        name: kube-prometheus-stack-kube-apiserver-slos
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-k8s.rules.pod-owner
+          serverside-applied
+        name: kube-prometheus-stack-k8s.rules.pod-owner
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-k8s.rules.container-cpu-usage-seconds-tot
+          serverside-applied
+        name: kube-prometheus-stack-k8s.rules.container-cpu-usage-seconds-tot
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kube-apiserver-histogram.rules
+          serverside-applied
+        name: kube-prometheus-stack-kube-apiserver-histogram.rules
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kube-apiserver-availability.rules
+          serverside-applied
+        name: kube-prometheus-stack-kube-apiserver-availability.rules
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kube-apiserver-burnrate.rules
+          serverside-applied
+        name: kube-prometheus-stack-kube-apiserver-burnrate.rules
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: ServiceMonitor
+        message: servicemonitor.monitoring.coreos.com/kube-prometheus-stack-kube-etcd
+          serverside-applied
+        name: kube-prometheus-stack-kube-etcd
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: ServiceMonitor
+        message: servicemonitor.monitoring.coreos.com/kube-prometheus-stack-kube-controller-manager
+          serverside-applied
+        name: kube-prometheus-stack-kube-controller-manager
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kube-prometheus-node-recording.rules
+          serverside-applied
+        name: kube-prometheus-stack-kube-prometheus-node-recording.rules
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kube-prometheus-general.rules
+          serverside-applied
+        name: kube-prometheus-stack-kube-prometheus-general.rules
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: ServiceMonitor
+        message: servicemonitor.monitoring.coreos.com/kube-prometheus-stack-kube-proxy
+          serverside-applied
+        name: kube-prometheus-stack-kube-proxy
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: ServiceMonitor
+        message: servicemonitor.monitoring.coreos.com/kube-prometheus-stack-kube-scheduler
+          serverside-applied
+        name: kube-prometheus-stack-kube-scheduler
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kube-scheduler.rules
+          serverside-applied
+        name: kube-prometheus-stack-kube-scheduler.rules
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kube-state-metrics
+          serverside-applied
+        name: kube-prometheus-stack-kube-state-metrics
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: ServiceMonitor
+        message: servicemonitor.monitoring.coreos.com/kube-prometheus-stack-kube-state-metrics
+          serverside-applied
+        name: kube-prometheus-stack-kube-state-metrics
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: ServiceMonitor
+        message: servicemonitor.monitoring.coreos.com/kube-prometheus-stack-kubelet
+          serverside-applied
+        name: kube-prometheus-stack-kubelet
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kubernetes-system-kube-proxy
+          serverside-applied
+        name: kube-prometheus-stack-kubernetes-system-kube-proxy
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kubelet.rules
+          serverside-applied
+        name: kube-prometheus-stack-kubelet.rules
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kubernetes-system-kubelet
+          serverside-applied
+        name: kube-prometheus-stack-kubernetes-system-kubelet
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-node-network
+          serverside-applied
+        name: kube-prometheus-stack-node-network
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-node-exporter.rules
+          serverside-applied
+        name: kube-prometheus-stack-node-exporter.rules
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kubernetes-system-scheduler
+          serverside-applied
+        name: kube-prometheus-stack-kubernetes-system-scheduler
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-node.rules
+          serverside-applied
+        name: kube-prometheus-stack-node.rules
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kubernetes-resources
+          serverside-applied
+        name: kube-prometheus-stack-kubernetes-resources
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kubernetes-system
+          serverside-applied
+        name: kube-prometheus-stack-kubernetes-system
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kubernetes-system-controller-manager
+          serverside-applied
+        name: kube-prometheus-stack-kubernetes-system-controller-manager
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kubernetes-storage
+          serverside-applied
+        name: kube-prometheus-stack-kubernetes-storage
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kubernetes-apps
+          serverside-applied
+        name: kube-prometheus-stack-kubernetes-apps
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-kubernetes-system-apiserver
+          serverside-applied
+        name: kube-prometheus-stack-kubernetes-system-apiserver
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-node-exporter
+          serverside-applied
+        name: kube-prometheus-stack-node-exporter
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: ServiceMonitor
+        message: servicemonitor.monitoring.coreos.com/kube-prometheus-stack-operator
+          serverside-applied
+        name: kube-prometheus-stack-operator
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-prometheus
+          serverside-applied
+        name: kube-prometheus-stack-prometheus
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: Prometheus
+        message: All instances are available
+        name: kube-prometheus-stack-prometheus
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: ServiceMonitor
+        message: servicemonitor.monitoring.coreos.com/kube-prometheus-stack-prometheus-node-exporter
+          serverside-applied
+        name: kube-prometheus-stack-prometheus-node-exporter
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: ServiceMonitor
+        message: servicemonitor.monitoring.coreos.com/kube-prometheus-stack-prometheus
+          serverside-applied
+        name: kube-prometheus-stack-prometheus
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Succeeded
+        kind: PrometheusRule
+        message: prometheusrule.monitoring.coreos.com/kube-prometheus-stack-prometheus-operator
+          serverside-applied
+        name: kube-prometheus-stack-prometheus-operator
+        namespace: istio-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Succeeded
+        hookType: PostSync
+        kind: ServiceAccount
+        message: kube-prometheus-stack-admission created
+        name: kube-prometheus-stack-admission
+        namespace: istio-system
+        syncPhase: PostSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PostSync
+        kind: ClusterRole
+        message: kube-prometheus-stack-admission created
+        name: kube-prometheus-stack-admission
+        namespace: istio-system
+        syncPhase: PostSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PostSync
+        kind: ClusterRoleBinding
+        message: kube-prometheus-stack-admission created
+        name: kube-prometheus-stack-admission
+        namespace: istio-system
+        syncPhase: PostSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PostSync
+        kind: Role
+        message: kube-prometheus-stack-admission created
+        name: kube-prometheus-stack-admission
+        namespace: istio-system
+        syncPhase: PostSync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Succeeded
+        hookType: PostSync
+        kind: RoleBinding
+        message: kube-prometheus-stack-admission created
+        name: kube-prometheus-stack-admission
+        namespace: istio-system
+        syncPhase: PostSync
+        version: v1
+      - group: batch
+        hookPhase: Succeeded
+        hookType: PostSync
+        kind: Job
+        message: job.batch/kube-prometheus-stack-admission-patch serverside-applied
+        name: kube-prometheus-stack-admission-patch
+        namespace: istio-system
+        syncPhase: PostSync
+        version: v1
+      revision: 65.2.0
+      source:
+        chart: kube-prometheus-stack
+        helm:
+          valueFiles:
+          - values.yaml
+          values: "grafana:\n  persistence:\n    enabled: true\n    size: 5Gi\n  adminPassword:
+            \"qwer1234!\"\n  ingress:\n    enabled: false\n    ingressClassName: nginx\n
+            \   annotations: \n      istio: aaa \n    labels: {}\n    hosts: \n      -
+            grafana.srrain.store\n    path: /\n\n    # tls: \n    #   - secretName:
+            grafana-general-tls\n    #     hosts:\n    #     - grafana.srrain.store\n
+            \ dashboards:\n    default:\n      istio-control-plane-dashboard:\n        gnetId:
+            7645\n        revision: 231\n        datasource: Prometheus\n      istio-mesh-dashboard:\n
+            \       gnetId: 7639\n        revision: 231\n        datasource: Prometheus\n
+            \     istio-performance-dashboard:\n        gnetId: 12153\n        revision:
+            231\n        datasource: Prometheus\n      istio-service-dashboard:\n
+            \       gnetId: 7636\n        revision: 231\n        datasource: Prometheus\n
+            \     istio-wasm-extension-dashboard:\n        gnetId: 13277\n        revision:
+            188\n        datasource: Prometheus\n      istio-workload-dashboard:\n
+            \       gnetId: 7630\n        revision: 231\n        datasource: Prometheus\n\n
+            \ #datasource에 pvc가 안 붙어 있어서 휘발되기에 미리 정의\n  additionalDataSources: \n
+            \ - name: Tempo\n    type: tempo\n    typeName: Tempo\n    access: proxy\n
+            \   url: http://tempo.tracing.svc:3100\n    password: ''\n    user: ''\n
+            \   database: ''\n    basicAuth: false\n    isDefault: false\n    jsonData:\n
+            \   nodeGraph:\n      enabled: true\n    tracesToLogs:\n      datasourceUid:
+            loki\n      filterBySpanID: false\n      filterByTraceID: true\n      mapTagNamesEnabled:
+            false\n      tags:\n          - compose_service\n    readOnly: false\n
+            \   editable: true\n  - name: loki\n    type: loki\n    uid: \n    url:
+            http://loki-distributed-gateway.logging.svc\n    access: proxy\n    basicAuth:
+            false\n    jsonData:\n      serviceMap:\n        datasourceUid: 'prometheus'\n\nprometheus:
+            \     \n  additionalServiceMonitors:\n    - name: \"istio-component-monitor\"\n
+            \     additionalLabels:\n        monitoring: istio-components\n        release:
+            istio\n      jobLabel: \"istio\"\n      targetLabels:\n        - app\n
+            \     selector:\n        matchExpressions:\n          - {key: istio, operator:
+            In, values: [pilot]}\n      namespaceSelector:\n        any: true\n      endpoints:\n
+            \       - port: http-monitoring\n          interval: 15s\n\n  additionalPodMonitors:\n
+            \   - name: \"envoy-stats-monitor\"\n      additionalLabels:\n        monitoring:
+            istio-proxies\n        release: istio\n      jobLabel: \"envoy-stats\"\n
+            \     selector:\n        matchExpressions:\n          - {key: istio-prometheus-ignore,
+            operator: DoesNotExist}\n      podTargetLabels: {}\n      sampleLimit:
+            0\n      namespaceSelector:\n        any: true\n        matchNames: []\n
+            \     podMetricsEndpoints:\n        - path: /stats/prometheus\n          interval:
+            15s\n          relabelings:\n            - action: keep\n              sourceLabels:
+            [__meta_kubernetes_pod_container_name]\n              regex: \"istio-proxy\"\n
+            \           - action: keep\n              sourceLabels: [__meta_kubernetes_pod_annotationpresent_prometheus_io_scrape]\n
+            \           - sourceLabels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]\n
+            \             action: replace\n              regex: ([^:]+)(?::\\d+)?;(\\d+)\n
+            \             replacement: $1:$2\n              targetLabel: __address__\n
+            \           - action: labeldrop\n              regex: \"__meta_kubernetes_pod_label_(.+)\"\n
+            \           - sourceLabels: [__meta_kubernetes_namespace]\n              action:
+            replace\n              targetLabel: namespace\n            - sourceLabels:
+            [__meta_kubernetes_pod_name]\n              action: replace\n              targetLabel:
+            pod_name\n\n  prometheusSpec:\n    enableRemoteWriteReceiver: true\n    #Tempo에서
+            Service Graph 그리기 위해 외부 접근 활성화\n    # dashboard가 휘발성이라 pvc mount\n    storageSpec:\n
+            \     volumeClaimTemplate:\n        spec:\n          accessModes: [\"ReadWriteOnce\"]\n
+            \         resources:\n            requests:\n              storage: 5Gi\n\n
+            \   volumeMounts:\n    - mountPath: /etc/istio-certs\n      name: istio-certs\n
+            \   volumes:\n    - name: istio-certs\n      secret:\n        defaultMode:
+            420\n        optional: true\n        secretName: istio-ca-secret\n    additionalScrapeConfigs:\n
+            \     - job_name: 'otel-collector'\n        scrape_interval: 10s\n        static_configs:\n
+            \         - targets: ['otel-collector.otel.svc:8889']\n          - targets:
+            ['otel-collector.otel.svc:8888']\n      - job_name: 'kubernetes-pods-istio-secure'\n
+            \       scheme: https\n        tls_config:\n          ca_file: /etc/istio-certs/root-cert.pem\n
+            \         cert_file: /etc/istio-certs/cert-chain.pem\n          key_file:
+            /etc/istio-certs/key.pem\n          insecure_skip_verify: true  # prometheus
+            does not support secure naming.\n        kubernetes_sd_configs:\n        -
+            role: pod\n        scrape_interval: 15s\n        relabel_configs:\n        -
+            source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]\n
+            \         action: keep\n          regex: true\n        # sidecar status
+            annotation is added by sidecar injector and\n        # istio_workload_mtls_ability
+            can be specifically placed on a pod to indicate its ability to receive
+            mtls traffic.\n        - source_labels: [__meta_kubernetes_pod_annotation_sidecar_istio_io_status,
+            __meta_kubernetes_pod_annotation_istio_mtls]\n          action: keep\n
+            \         regex: (([^;]+);([^;]*))|(([^;]*);(true))\n        - source_labels:
+            [__meta_kubernetes_pod_annotation_prometheus_io_scheme]\n          action:
+            drop\n          regex: (http)\n        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]\n
+            \         action: replace\n          target_label: __metrics_path__\n
+            \         regex: (.+)\n        - source_labels: [__address__]  # Only
+            keep address that is host:port\n          action: keep    # otherwise
+            an extra target with ':443' is added for https scheme\n          regex:
+            ([^:]+):(\\d+)\n        - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]\n
+            \         action: replace\n          regex: ([^:]+)(?::\\d+)?;(\\d+)\n
+            \         replacement: $1:$2\n          target_label: __address__\n        -
+            action: labelmap\n          regex: __meta_kubernetes_pod_label_(.+)\n
+            \       - source_labels: [__meta_kubernetes_namespace]\n          action:
+            replace\n          target_label: namespace\n        - source_labels: [__meta_kubernetes_pod_name]\n
+            \         action: replace\n          target_label: pod_name\n      - job_name:
+            prometheus\n        static_configs:\n        - targets:\n          - localhost:9090\n
+            \     - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token\n
+            \       job_name: kubernetes-apiservers\n        kubernetes_sd_configs:\n
+            \       - role: endpoints\n        relabel_configs:\n        - action:
+            keep\n          regex: default;kubernetes;https\n          source_labels:\n
+            \         - __meta_kubernetes_namespace\n          - __meta_kubernetes_service_name\n
+            \         - __meta_kubernetes_endpoint_port_name\n        scheme: https\n
+            \       tls_config:\n          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt\n
+            \         insecure_skip_verify: true\n      - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token\n
+            \       job_name: kubernetes-nodes\n        kubernetes_sd_configs:\n        -
+            role: node\n        relabel_configs:\n        - action: labelmap\n          regex:
+            __meta_kubernetes_node_label_(.+)\n        - replacement: kubernetes.default.svc:443\n
+            \         target_label: __address__\n        - regex: (.+)\n          replacement:
+            /api/v1/nodes/$1/proxy/metrics\n          source_labels:\n          -
+            __meta_kubernetes_node_name\n          target_label: __metrics_path__\n
+            \       scheme: https\n        tls_config:\n          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt\n
+            \         insecure_skip_verify: true\n      - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token\n
+            \       job_name: kubernetes-nodes-cadvisor\n        kubernetes_sd_configs:\n
+            \       - role: node\n        relabel_configs:\n        - action: labelmap\n
+            \         regex: __meta_kubernetes_node_label_(.+)\n        - replacement:
+            kubernetes.default.svc:443\n          target_label: __address__\n        -
+            regex: (.+)\n          replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor\n
+            \         source_labels:\n          - __meta_kubernetes_node_name\n          target_label:
+            __metrics_path__\n        scheme: https\n        tls_config:\n          ca_file:
+            /var/run/secrets/kubernetes.io/serviceaccount/ca.crt\n          insecure_skip_verify:
+            true\n      - honor_labels: true\n        job_name: kubernetes-service-endpoints\n
+            \       kubernetes_sd_configs:\n        - role: endpoints\n        relabel_configs:\n
+            \       - action: keep\n          regex: true\n          source_labels:\n
+            \         - __meta_kubernetes_service_annotation_prometheus_io_scrape\n
+            \       - action: drop\n          regex: true\n          source_labels:\n
+            \         - __meta_kubernetes_service_annotation_prometheus_io_scrape_slow\n
+            \       - action: replace\n          regex: (https?)\n          source_labels:\n
+            \         - __meta_kubernetes_service_annotation_prometheus_io_scheme\n
+            \         target_label: __scheme__\n        - action: replace\n          regex:
+            (.+)\n          source_labels:\n          - __meta_kubernetes_service_annotation_prometheus_io_path\n
+            \         target_label: __metrics_path__\n        - action: replace\n
+            \         regex: (.+?)(?::\\d+)?;(\\d+)\n          replacement: $1:$2\n
+            \         source_labels:\n          - __address__\n          - __meta_kubernetes_service_annotation_prometheus_io_port\n
+            \         target_label: __address__\n        - action: labelmap\n          regex:
+            __meta_kubernetes_service_annotation_prometheus_io_param_(.+)\n          replacement:
+            __param_$1\n        - action: labelmap\n          regex: __meta_kubernetes_service_label_(.+)\n
+            \       - action: replace\n          source_labels:\n          - __meta_kubernetes_namespace\n
+            \         target_label: namespace\n        - action: replace\n          source_labels:\n
+            \         - __meta_kubernetes_service_name\n          target_label: service\n
+            \       - action: replace\n          source_labels:\n          - __meta_kubernetes_pod_node_name\n
+            \         target_label: node\n      - honor_labels: true\n        job_name:
+            kubernetes-service-endpoints-slow\n        kubernetes_sd_configs:\n        -
+            role: endpoints\n        relabel_configs:\n        - action: keep\n          regex:
+            true\n          source_labels:\n          - __meta_kubernetes_service_annotation_prometheus_io_scrape_slow\n
+            \       - action: replace\n          regex: (https?)\n          source_labels:\n
+            \         - __meta_kubernetes_service_annotation_prometheus_io_scheme\n
+            \         target_label: __scheme__\n        - action: replace\n          regex:
+            (.+)\n          source_labels:\n          - __meta_kubernetes_service_annotation_prometheus_io_path\n
+            \         target_label: __metrics_path__\n        - action: replace\n
+            \         regex: (.+?)(?::\\d+)?;(\\d+)\n          replacement: $1:$2\n
+            \         source_labels:\n          - __address__\n          - __meta_kubernetes_service_annotation_prometheus_io_port\n
+            \         target_label: __address__\n        - action: labelmap\n          regex:
+            __meta_kubernetes_service_annotation_prometheus_io_param_(.+)\n          replacement:
+            __param_$1\n        - action: labelmap\n          regex: __meta_kubernetes_service_label_(.+)\n
+            \       - action: replace\n          source_labels:\n          - __meta_kubernetes_namespace\n
+            \         target_label: namespace\n        - action: replace\n          source_labels:\n
+            \         - __meta_kubernetes_service_name\n          target_label: service\n
+            \       - action: replace\n          source_labels:\n          - __meta_kubernetes_pod_node_name\n
+            \         target_label: node\n        scrape_interval: 5m\n        scrape_timeout:
+            30s\n      - honor_labels: true\n        job_name: prometheus-pushgateway\n
+            \       kubernetes_sd_configs:\n        - role: service\n        relabel_configs:\n
+            \       - action: keep\n          regex: pushgateway\n          source_labels:\n
+            \         - __meta_kubernetes_service_annotation_prometheus_io_probe\n
+            \     - honor_labels: true\n        job_name: kubernetes-services\n        kubernetes_sd_configs:\n
+            \       - role: service\n        metrics_path: /probe\n        params:\n
+            \         module:\n          - http_2xx\n        relabel_configs:\n        -
+            action: keep\n          regex: true\n          source_labels:\n          -
+            __meta_kubernetes_service_annotation_prometheus_io_probe\n        - source_labels:\n
+            \         - __address__\n          target_label: __param_target\n        -
+            replacement: blackbox\n          target_label: __address__\n        -
+            source_labels:\n          - __param_target\n          target_label: instance\n
+            \       - action: labelmap\n          regex: __meta_kubernetes_service_label_(.+)\n
+            \       - source_labels:\n          - __meta_kubernetes_namespace\n          target_label:
+            namespace\n        - source_labels:\n          - __meta_kubernetes_service_name\n
+            \         target_label: service\n      - honor_labels: true\n        job_name:
+            kubernetes-pods\n        kubernetes_sd_configs:\n        - role: pod\n
+            \       relabel_configs:\n        - action: keep\n          regex: true\n
+            \         source_labels:\n          - __meta_kubernetes_pod_annotation_prometheus_io_scrape\n
+            \       - action: drop\n          regex: true\n          source_labels:\n
+            \         - __meta_kubernetes_pod_annotation_prometheus_io_scrape_slow\n
+            \       - action: replace\n          regex: (https?)\n          source_labels:\n
+            \         - __meta_kubernetes_pod_annotation_prometheus_io_scheme\n          target_label:
+            __scheme__\n        - action: replace\n          regex: (.+)\n          source_labels:\n
+            \         - __meta_kubernetes_pod_annotation_prometheus_io_path\n          target_label:
+            __metrics_path__\n        - action: replace\n          regex: (\\d+);(([A-Fa-f0-9]{1,4}::?){1,7}[A-Fa-f0-9]{1,4})\n
+            \         replacement: '[$2]:$1'\n          source_labels:\n          -
+            __meta_kubernetes_pod_annotation_prometheus_io_port\n          - __meta_kubernetes_pod_ip\n
+            \         target_label: __address__\n        - action: replace\n          regex:
+            (\\d+);((([0-9]+?)(\\.|$)){4})\n          replacement: $2:$1\n          source_labels:\n
+            \         - __meta_kubernetes_pod_annotation_prometheus_io_port\n          -
+            __meta_kubernetes_pod_ip\n          target_label: __address__\n        -
+            action: labelmap\n          regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)\n
+            \         replacement: __param_$1\n        - action: labelmap\n          regex:
+            __meta_kubernetes_pod_label_(.+)\n        - action: replace\n          source_labels:\n
+            \         - __meta_kubernetes_namespace\n          target_label: namespace\n
+            \       - action: replace\n          source_labels:\n          - __meta_kubernetes_pod_name\n
+            \         target_label: pod\n        - action: drop\n          regex:
+            Pending|Succeeded|Failed|Completed\n          source_labels:\n          -
+            __meta_kubernetes_pod_phase\n        - action: replace\n          source_labels:\n
+            \         - __meta_kubernetes_pod_node_name\n          target_label: node\n
+            \     - honor_labels: true\n        job_name: kubernetes-pods-slow\n        kubernetes_sd_configs:\n
+            \       - role: pod\n        relabel_configs:\n        - action: keep\n
+            \         regex: true\n          source_labels:\n          - __meta_kubernetes_pod_annotation_prometheus_io_scrape_slow\n
+            \       - action: replace\n          regex: (https?)\n          source_labels:\n
+            \         - __meta_kubernetes_pod_annotation_prometheus_io_scheme\n          target_label:
+            __scheme__\n        - action: replace\n          regex: (.+)\n          source_labels:\n
+            \         - __meta_kubernetes_pod_annotation_prometheus_io_path\n          target_label:
+            __metrics_path__\n        - action: replace\n          regex: (\\d+);(([A-Fa-f0-9]{1,4}::?){1,7}[A-Fa-f0-9]{1,4})\n
+            \         replacement: '[$2]:$1'\n          source_labels:\n          -
+            __meta_kubernetes_pod_annotation_prometheus_io_port\n          - __meta_kubernetes_pod_ip\n
+            \         target_label: __address__\n        - action: replace\n          regex:
+            (\\d+);((([0-9]+?)(\\.|$)){4})\n          replacement: $2:$1\n          source_labels:\n
+            \         - __meta_kubernetes_pod_annotation_prometheus_io_port\n          -
+            __meta_kubernetes_pod_ip\n          target_label: __address__\n        -
+            action: labelmap\n          regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)\n
+            \         replacement: __param_$1\n        - action: labelmap\n          regex:
+            __meta_kubernetes_pod_label_(.+)\n        - action: replace\n          source_labels:\n
+            \         - __meta_kubernetes_namespace\n          target_label: namespace\n
+            \       - action: replace\n          source_labels:\n          - __meta_kubernetes_pod_name\n
+            \         target_label: pod\n        - action: drop\n          regex:
+            Pending|Succeeded|Failed|Completed\n          source_labels:\n          -
+            __meta_kubernetes_pod_phase\n        - action: replace\n          source_labels:\n
+            \         - __meta_kubernetes_pod_node_name\n          target_label: node\n
+            \       scrape_interval: 5m\n        scrape_timeout: 30s"
+        repoURL: https://prometheus-community.github.io/helm-charts
+        targetRevision: 65.2.0
+  reconciledAt: "2024-11-12T14:07:12Z"
+  resources:
+  - kind: ConfigMap
+    name: kube-prometheus-stack-alertmanager-overview
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-apiserver
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-cluster-total
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-controller-manager
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-etcd
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-grafana
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-grafana-config-dashboards
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-grafana-dashboards-default
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-grafana-datasource
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-grafana-overview
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-k8s-coredns
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-k8s-resources-cluster
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-k8s-resources-multicluster
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-k8s-resources-namespace
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-k8s-resources-node
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-k8s-resources-pod
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-k8s-resources-workload
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-k8s-resources-workloads-namespace
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-kubelet
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-namespace-by-pod
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-namespace-by-workload
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-node-cluster-rsrc-use
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-node-rsrc-use
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-nodes
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-nodes-aix
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-nodes-darwin
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-persistentvolumesusage
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-pod-total
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-prometheus
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-proxy
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-scheduler
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ConfigMap
+    name: kube-prometheus-stack-workload-total
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: PersistentVolumeClaim
+    name: kube-prometheus-stack-grafana
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: Secret
+    name: alertmanager-kube-prometheus-stack-alertmanager
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: Secret
+    name: kube-prometheus-stack-grafana
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: Secret
+    name: kube-prometheus-stack-prometheus-scrape-confg
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: kube-prometheus-stack-alertmanager
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: kube-prometheus-stack-grafana
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: kube-prometheus-stack-kube-state-metrics
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: kube-prometheus-stack-operator
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: kube-prometheus-stack-prometheus
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: kube-prometheus-stack-prometheus-node-exporter
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: kube-prometheus-stack-coredns
+    namespace: kube-system
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: kube-prometheus-stack-kube-controller-manager
+    namespace: kube-system
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: kube-prometheus-stack-kube-etcd
+    namespace: kube-system
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: kube-prometheus-stack-kube-proxy
+    namespace: kube-system
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: kube-prometheus-stack-kube-scheduler
+    namespace: kube-system
+    status: Synced
+    version: v1
+  - kind: ServiceAccount
+    name: kube-prometheus-stack-alertmanager
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ServiceAccount
+    name: kube-prometheus-stack-grafana
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ServiceAccount
+    name: kube-prometheus-stack-kube-state-metrics
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ServiceAccount
+    name: kube-prometheus-stack-operator
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ServiceAccount
+    name: kube-prometheus-stack-prometheus
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - kind: ServiceAccount
+    name: kube-prometheus-stack-prometheus-node-exporter
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: admissionregistration.k8s.io
+    kind: MutatingWebhookConfiguration
+    name: kube-prometheus-stack-admission
+    status: Synced
+    version: v1
+  - group: admissionregistration.k8s.io
+    kind: ValidatingWebhookConfiguration
+    name: kube-prometheus-stack-admission
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: alertmanagerconfigs.monitoring.coreos.com
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: alertmanagers.monitoring.coreos.com
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: podmonitors.monitoring.coreos.com
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: probes.monitoring.coreos.com
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: prometheusagents.monitoring.coreos.com
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: prometheuses.monitoring.coreos.com
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: prometheusrules.monitoring.coreos.com
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: scrapeconfigs.monitoring.coreos.com
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: servicemonitors.monitoring.coreos.com
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: thanosrulers.monitoring.coreos.com
+    status: Synced
+    version: v1
+  - group: apps
+    health:
+      status: Healthy
+    kind: DaemonSet
+    name: kube-prometheus-stack-prometheus-node-exporter
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: apps
+    health:
+      status: Healthy
+    kind: Deployment
+    name: kube-prometheus-stack-grafana
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: apps
+    health:
+      status: Healthy
+    kind: Deployment
+    name: kube-prometheus-stack-kube-state-metrics
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: apps
+    health:
+      status: Healthy
+    kind: Deployment
+    name: kube-prometheus-stack-operator
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: Alertmanager
+    name: kube-prometheus-stack-alertmanager
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PodMonitor
+    name: envoy-stats-monitor
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    health:
+      message: All instances are available
+      status: Healthy
+    kind: Prometheus
+    name: kube-prometheus-stack-prometheus
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-alertmanager.rules
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-config-reloaders
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-etcd
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-general.rules
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-k8s.rules.container-cpu-usage-seconds-tot
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-k8s.rules.container-memory-cache
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-k8s.rules.container-memory-rss
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-k8s.rules.container-memory-swap
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-k8s.rules.container-memory-working-set-by
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-k8s.rules.container-resource
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-k8s.rules.pod-owner
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kube-apiserver-availability.rules
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kube-apiserver-burnrate.rules
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kube-apiserver-histogram.rules
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kube-apiserver-slos
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kube-prometheus-general.rules
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kube-prometheus-node-recording.rules
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kube-scheduler.rules
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kube-state-metrics
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kubelet.rules
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kubernetes-apps
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kubernetes-resources
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kubernetes-storage
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kubernetes-system
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kubernetes-system-apiserver
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kubernetes-system-controller-manager
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kubernetes-system-kube-proxy
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kubernetes-system-kubelet
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-kubernetes-system-scheduler
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-node-exporter
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-node-exporter.rules
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-node-network
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-node.rules
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-prometheus
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: kube-prometheus-stack-prometheus-operator
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: ServiceMonitor
+    name: istio-component-monitor
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: ServiceMonitor
+    name: kube-prometheus-stack-alertmanager
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: ServiceMonitor
+    name: kube-prometheus-stack-apiserver
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: ServiceMonitor
+    name: kube-prometheus-stack-coredns
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: ServiceMonitor
+    name: kube-prometheus-stack-grafana
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: ServiceMonitor
+    name: kube-prometheus-stack-kube-controller-manager
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: ServiceMonitor
+    name: kube-prometheus-stack-kube-etcd
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: ServiceMonitor
+    name: kube-prometheus-stack-kube-proxy
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: ServiceMonitor
+    name: kube-prometheus-stack-kube-scheduler
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: ServiceMonitor
+    name: kube-prometheus-stack-kube-state-metrics
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: ServiceMonitor
+    name: kube-prometheus-stack-kubelet
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: ServiceMonitor
+    name: kube-prometheus-stack-operator
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: ServiceMonitor
+    name: kube-prometheus-stack-prometheus
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: ServiceMonitor
+    name: kube-prometheus-stack-prometheus-node-exporter
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: kube-prometheus-stack-grafana-clusterrole
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: kube-prometheus-stack-kube-state-metrics
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: kube-prometheus-stack-operator
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: kube-prometheus-stack-prometheus
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRoleBinding
+    name: kube-prometheus-stack-grafana-clusterrolebinding
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRoleBinding
+    name: kube-prometheus-stack-kube-state-metrics
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRoleBinding
+    name: kube-prometheus-stack-operator
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRoleBinding
+    name: kube-prometheus-stack-prometheus
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: Role
+    name: kube-prometheus-stack-grafana
+    namespace: istio-system
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: RoleBinding
+    name: kube-prometheus-stack-grafana
+    namespace: istio-system
+    status: Synced
+    version: v1
+  sourceType: Helm
+  summary:
+    images:
+    - docker.io/curlimages/curl:7.85.0
+    - docker.io/grafana/grafana:11.2.1
+    - docker.io/library/busybox:1.31.1
+    - quay.io/kiwigrid/k8s-sidecar:1.27.4
+    - quay.io/prometheus-operator/prometheus-config-reloader:v0.77.1
+    - quay.io/prometheus-operator/prometheus-operator:v0.77.1
+    - quay.io/prometheus/alertmanager:v0.27.0
+    - quay.io/prometheus/node-exporter:v1.8.2
+    - quay.io/prometheus/prometheus:v2.54.1
+    - registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0
+  sync:
+    comparedTo:
+      destination:
+        namespace: istio-system
+        server: https://kubernetes.default.svc
+      source:
+        chart: kube-prometheus-stack
+        helm:
+          valueFiles:
+          - values.yaml
+          values: "grafana:\n  persistence:\n    enabled: true\n    size: 5Gi\n  adminPassword:
+            \"qwer1234!\"\n  ingress:\n    enabled: false\n    ingressClassName: nginx\n
+            \   annotations: \n      istio: aaa \n    labels: {}\n    hosts: \n      -
+            grafana.srrain.store\n    path: /\n\n    # tls: \n    #   - secretName:
+            grafana-general-tls\n    #     hosts:\n    #     - grafana.srrain.store\n
+            \ dashboards:\n    default:\n      istio-control-plane-dashboard:\n        gnetId:
+            7645\n        revision: 231\n        datasource: Prometheus\n      istio-mesh-dashboard:\n
+            \       gnetId: 7639\n        revision: 231\n        datasource: Prometheus\n
+            \     istio-performance-dashboard:\n        gnetId: 12153\n        revision:
+            231\n        datasource: Prometheus\n      istio-service-dashboard:\n
+            \       gnetId: 7636\n        revision: 231\n        datasource: Prometheus\n
+            \     istio-wasm-extension-dashboard:\n        gnetId: 13277\n        revision:
+            188\n        datasource: Prometheus\n      istio-workload-dashboard:\n
+            \       gnetId: 7630\n        revision: 231\n        datasource: Prometheus\n\n
+            \ #datasource에 pvc가 안 붙어 있어서 휘발되기에 미리 정의\n  additionalDataSources: \n
+            \ - name: Tempo\n    type: tempo\n    typeName: Tempo\n    access: proxy\n
+            \   url: http://tempo.tracing.svc:3100\n    password: ''\n    user: ''\n
+            \   database: ''\n    basicAuth: false\n    isDefault: false\n    jsonData:\n
+            \   nodeGraph:\n      enabled: true\n    tracesToLogs:\n      datasourceUid:
+            loki\n      filterBySpanID: false\n      filterByTraceID: true\n      mapTagNamesEnabled:
+            false\n      tags:\n          - compose_service\n    readOnly: false\n
+            \   editable: true\n  - name: loki\n    type: loki\n    uid: \n    url:
+            http://loki-distributed-gateway.logging.svc\n    access: proxy\n    basicAuth:
+            false\n    jsonData:\n      serviceMap:\n        datasourceUid: 'prometheus'\n\nprometheus:
+            \     \n  additionalServiceMonitors:\n    - name: \"istio-component-monitor\"\n
+            \     additionalLabels:\n        monitoring: istio-components\n        release:
+            istio\n      jobLabel: \"istio\"\n      targetLabels:\n        - app\n
+            \     selector:\n        matchExpressions:\n          - {key: istio, operator:
+            In, values: [pilot]}\n      namespaceSelector:\n        any: true\n      endpoints:\n
+            \       - port: http-monitoring\n          interval: 15s\n\n  additionalPodMonitors:\n
+            \   - name: \"envoy-stats-monitor\"\n      additionalLabels:\n        monitoring:
+            istio-proxies\n        release: istio\n      jobLabel: \"envoy-stats\"\n
+            \     selector:\n        matchExpressions:\n          - {key: istio-prometheus-ignore,
+            operator: DoesNotExist}\n      podTargetLabels: {}\n      sampleLimit:
+            0\n      namespaceSelector:\n        any: true\n        matchNames: []\n
+            \     podMetricsEndpoints:\n        - path: /stats/prometheus\n          interval:
+            15s\n          relabelings:\n            - action: keep\n              sourceLabels:
+            [__meta_kubernetes_pod_container_name]\n              regex: \"istio-proxy\"\n
+            \           - action: keep\n              sourceLabels: [__meta_kubernetes_pod_annotationpresent_prometheus_io_scrape]\n
+            \           - sourceLabels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]\n
+            \             action: replace\n              regex: ([^:]+)(?::\\d+)?;(\\d+)\n
+            \             replacement: $1:$2\n              targetLabel: __address__\n
+            \           - action: labeldrop\n              regex: \"__meta_kubernetes_pod_label_(.+)\"\n
+            \           - sourceLabels: [__meta_kubernetes_namespace]\n              action:
+            replace\n              targetLabel: namespace\n            - sourceLabels:
+            [__meta_kubernetes_pod_name]\n              action: replace\n              targetLabel:
+            pod_name\n\n  prometheusSpec:\n    enableRemoteWriteReceiver: true\n    #Tempo에서
+            Service Graph 그리기 위해 외부 접근 활성화\n    # dashboard가 휘발성이라 pvc mount\n    storageSpec:\n
+            \     volumeClaimTemplate:\n        spec:\n          accessModes: [\"ReadWriteOnce\"]\n
+            \         resources:\n            requests:\n              storage: 5Gi\n\n
+            \   volumeMounts:\n    - mountPath: /etc/istio-certs\n      name: istio-certs\n
+            \   volumes:\n    - name: istio-certs\n      secret:\n        defaultMode:
+            420\n        optional: true\n        secretName: istio-ca-secret\n    additionalScrapeConfigs:\n
+            \     - job_name: 'otel-collector'\n        scrape_interval: 10s\n        static_configs:\n
+            \         - targets: ['otel-collector.otel.svc:8889']\n          - targets:
+            ['otel-collector.otel.svc:8888']\n      - job_name: 'kubernetes-pods-istio-secure'\n
+            \       scheme: https\n        tls_config:\n          ca_file: /etc/istio-certs/root-cert.pem\n
+            \         cert_file: /etc/istio-certs/cert-chain.pem\n          key_file:
+            /etc/istio-certs/key.pem\n          insecure_skip_verify: true  # prometheus
+            does not support secure naming.\n        kubernetes_sd_configs:\n        -
+            role: pod\n        scrape_interval: 15s\n        relabel_configs:\n        -
+            source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]\n
+            \         action: keep\n          regex: true\n        # sidecar status
+            annotation is added by sidecar injector and\n        # istio_workload_mtls_ability
+            can be specifically placed on a pod to indicate its ability to receive
+            mtls traffic.\n        - source_labels: [__meta_kubernetes_pod_annotation_sidecar_istio_io_status,
+            __meta_kubernetes_pod_annotation_istio_mtls]\n          action: keep\n
+            \         regex: (([^;]+);([^;]*))|(([^;]*);(true))\n        - source_labels:
+            [__meta_kubernetes_pod_annotation_prometheus_io_scheme]\n          action:
+            drop\n          regex: (http)\n        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]\n
+            \         action: replace\n          target_label: __metrics_path__\n
+            \         regex: (.+)\n        - source_labels: [__address__]  # Only
+            keep address that is host:port\n          action: keep    # otherwise
+            an extra target with ':443' is added for https scheme\n          regex:
+            ([^:]+):(\\d+)\n        - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]\n
+            \         action: replace\n          regex: ([^:]+)(?::\\d+)?;(\\d+)\n
+            \         replacement: $1:$2\n          target_label: __address__\n        -
+            action: labelmap\n          regex: __meta_kubernetes_pod_label_(.+)\n
+            \       - source_labels: [__meta_kubernetes_namespace]\n          action:
+            replace\n          target_label: namespace\n        - source_labels: [__meta_kubernetes_pod_name]\n
+            \         action: replace\n          target_label: pod_name\n      - job_name:
+            prometheus\n        static_configs:\n        - targets:\n          - localhost:9090\n
+            \     - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token\n
+            \       job_name: kubernetes-apiservers\n        kubernetes_sd_configs:\n
+            \       - role: endpoints\n        relabel_configs:\n        - action:
+            keep\n          regex: default;kubernetes;https\n          source_labels:\n
+            \         - __meta_kubernetes_namespace\n          - __meta_kubernetes_service_name\n
+            \         - __meta_kubernetes_endpoint_port_name\n        scheme: https\n
+            \       tls_config:\n          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt\n
+            \         insecure_skip_verify: true\n      - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token\n
+            \       job_name: kubernetes-nodes\n        kubernetes_sd_configs:\n        -
+            role: node\n        relabel_configs:\n        - action: labelmap\n          regex:
+            __meta_kubernetes_node_label_(.+)\n        - replacement: kubernetes.default.svc:443\n
+            \         target_label: __address__\n        - regex: (.+)\n          replacement:
+            /api/v1/nodes/$1/proxy/metrics\n          source_labels:\n          -
+            __meta_kubernetes_node_name\n          target_label: __metrics_path__\n
+            \       scheme: https\n        tls_config:\n          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt\n
+            \         insecure_skip_verify: true\n      - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token\n
+            \       job_name: kubernetes-nodes-cadvisor\n        kubernetes_sd_configs:\n
+            \       - role: node\n        relabel_configs:\n        - action: labelmap\n
+            \         regex: __meta_kubernetes_node_label_(.+)\n        - replacement:
+            kubernetes.default.svc:443\n          target_label: __address__\n        -
+            regex: (.+)\n          replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor\n
+            \         source_labels:\n          - __meta_kubernetes_node_name\n          target_label:
+            __metrics_path__\n        scheme: https\n        tls_config:\n          ca_file:
+            /var/run/secrets/kubernetes.io/serviceaccount/ca.crt\n          insecure_skip_verify:
+            true\n      - honor_labels: true\n        job_name: kubernetes-service-endpoints\n
+            \       kubernetes_sd_configs:\n        - role: endpoints\n        relabel_configs:\n
+            \       - action: keep\n          regex: true\n          source_labels:\n
+            \         - __meta_kubernetes_service_annotation_prometheus_io_scrape\n
+            \       - action: drop\n          regex: true\n          source_labels:\n
+            \         - __meta_kubernetes_service_annotation_prometheus_io_scrape_slow\n
+            \       - action: replace\n          regex: (https?)\n          source_labels:\n
+            \         - __meta_kubernetes_service_annotation_prometheus_io_scheme\n
+            \         target_label: __scheme__\n        - action: replace\n          regex:
+            (.+)\n          source_labels:\n          - __meta_kubernetes_service_annotation_prometheus_io_path\n
+            \         target_label: __metrics_path__\n        - action: replace\n
+            \         regex: (.+?)(?::\\d+)?;(\\d+)\n          replacement: $1:$2\n
+            \         source_labels:\n          - __address__\n          - __meta_kubernetes_service_annotation_prometheus_io_port\n
+            \         target_label: __address__\n        - action: labelmap\n          regex:
+            __meta_kubernetes_service_annotation_prometheus_io_param_(.+)\n          replacement:
+            __param_$1\n        - action: labelmap\n          regex: __meta_kubernetes_service_label_(.+)\n
+            \       - action: replace\n          source_labels:\n          - __meta_kubernetes_namespace\n
+            \         target_label: namespace\n        - action: replace\n          source_labels:\n
+            \         - __meta_kubernetes_service_name\n          target_label: service\n
+            \       - action: replace\n          source_labels:\n          - __meta_kubernetes_pod_node_name\n
+            \         target_label: node\n      - honor_labels: true\n        job_name:
+            kubernetes-service-endpoints-slow\n        kubernetes_sd_configs:\n        -
+            role: endpoints\n        relabel_configs:\n        - action: keep\n          regex:
+            true\n          source_labels:\n          - __meta_kubernetes_service_annotation_prometheus_io_scrape_slow\n
+            \       - action: replace\n          regex: (https?)\n          source_labels:\n
+            \         - __meta_kubernetes_service_annotation_prometheus_io_scheme\n
+            \         target_label: __scheme__\n        - action: replace\n          regex:
+            (.+)\n          source_labels:\n          - __meta_kubernetes_service_annotation_prometheus_io_path\n
+            \         target_label: __metrics_path__\n        - action: replace\n
+            \         regex: (.+?)(?::\\d+)?;(\\d+)\n          replacement: $1:$2\n
+            \         source_labels:\n          - __address__\n          - __meta_kubernetes_service_annotation_prometheus_io_port\n
+            \         target_label: __address__\n        - action: labelmap\n          regex:
+            __meta_kubernetes_service_annotation_prometheus_io_param_(.+)\n          replacement:
+            __param_$1\n        - action: labelmap\n          regex: __meta_kubernetes_service_label_(.+)\n
+            \       - action: replace\n          source_labels:\n          - __meta_kubernetes_namespace\n
+            \         target_label: namespace\n        - action: replace\n          source_labels:\n
+            \         - __meta_kubernetes_service_name\n          target_label: service\n
+            \       - action: replace\n          source_labels:\n          - __meta_kubernetes_pod_node_name\n
+            \         target_label: node\n        scrape_interval: 5m\n        scrape_timeout:
+            30s\n      - honor_labels: true\n        job_name: prometheus-pushgateway\n
+            \       kubernetes_sd_configs:\n        - role: service\n        relabel_configs:\n
+            \       - action: keep\n          regex: pushgateway\n          source_labels:\n
+            \         - __meta_kubernetes_service_annotation_prometheus_io_probe\n
+            \     - honor_labels: true\n        job_name: kubernetes-services\n        kubernetes_sd_configs:\n
+            \       - role: service\n        metrics_path: /probe\n        params:\n
+            \         module:\n          - http_2xx\n        relabel_configs:\n        -
+            action: keep\n          regex: true\n          source_labels:\n          -
+            __meta_kubernetes_service_annotation_prometheus_io_probe\n        - source_labels:\n
+            \         - __address__\n          target_label: __param_target\n        -
+            replacement: blackbox\n          target_label: __address__\n        -
+            source_labels:\n          - __param_target\n          target_label: instance\n
+            \       - action: labelmap\n          regex: __meta_kubernetes_service_label_(.+)\n
+            \       - source_labels:\n          - __meta_kubernetes_namespace\n          target_label:
+            namespace\n        - source_labels:\n          - __meta_kubernetes_service_name\n
+            \         target_label: service\n      - honor_labels: true\n        job_name:
+            kubernetes-pods\n        kubernetes_sd_configs:\n        - role: pod\n
+            \       relabel_configs:\n        - action: keep\n          regex: true\n
+            \         source_labels:\n          - __meta_kubernetes_pod_annotation_prometheus_io_scrape\n
+            \       - action: drop\n          regex: true\n          source_labels:\n
+            \         - __meta_kubernetes_pod_annotation_prometheus_io_scrape_slow\n
+            \       - action: replace\n          regex: (https?)\n          source_labels:\n
+            \         - __meta_kubernetes_pod_annotation_prometheus_io_scheme\n          target_label:
+            __scheme__\n        - action: replace\n          regex: (.+)\n          source_labels:\n
+            \         - __meta_kubernetes_pod_annotation_prometheus_io_path\n          target_label:
+            __metrics_path__\n        - action: replace\n          regex: (\\d+);(([A-Fa-f0-9]{1,4}::?){1,7}[A-Fa-f0-9]{1,4})\n
+            \         replacement: '[$2]:$1'\n          source_labels:\n          -
+            __meta_kubernetes_pod_annotation_prometheus_io_port\n          - __meta_kubernetes_pod_ip\n
+            \         target_label: __address__\n        - action: replace\n          regex:
+            (\\d+);((([0-9]+?)(\\.|$)){4})\n          replacement: $2:$1\n          source_labels:\n
+            \         - __meta_kubernetes_pod_annotation_prometheus_io_port\n          -
+            __meta_kubernetes_pod_ip\n          target_label: __address__\n        -
+            action: labelmap\n          regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)\n
+            \         replacement: __param_$1\n        - action: labelmap\n          regex:
+            __meta_kubernetes_pod_label_(.+)\n        - action: replace\n          source_labels:\n
+            \         - __meta_kubernetes_namespace\n          target_label: namespace\n
+            \       - action: replace\n          source_labels:\n          - __meta_kubernetes_pod_name\n
+            \         target_label: pod\n        - action: drop\n          regex:
+            Pending|Succeeded|Failed|Completed\n          source_labels:\n          -
+            __meta_kubernetes_pod_phase\n        - action: replace\n          source_labels:\n
+            \         - __meta_kubernetes_pod_node_name\n          target_label: node\n
+            \     - honor_labels: true\n        job_name: kubernetes-pods-slow\n        kubernetes_sd_configs:\n
+            \       - role: pod\n        relabel_configs:\n        - action: keep\n
+            \         regex: true\n          source_labels:\n          - __meta_kubernetes_pod_annotation_prometheus_io_scrape_slow\n
+            \       - action: replace\n          regex: (https?)\n          source_labels:\n
+            \         - __meta_kubernetes_pod_annotation_prometheus_io_scheme\n          target_label:
+            __scheme__\n        - action: replace\n          regex: (.+)\n          source_labels:\n
+            \         - __meta_kubernetes_pod_annotation_prometheus_io_path\n          target_label:
+            __metrics_path__\n        - action: replace\n          regex: (\\d+);(([A-Fa-f0-9]{1,4}::?){1,7}[A-Fa-f0-9]{1,4})\n
+            \         replacement: '[$2]:$1'\n          source_labels:\n          -
+            __meta_kubernetes_pod_annotation_prometheus_io_port\n          - __meta_kubernetes_pod_ip\n
+            \         target_label: __address__\n        - action: replace\n          regex:
+            (\\d+);((([0-9]+?)(\\.|$)){4})\n          replacement: $2:$1\n          source_labels:\n
+            \         - __meta_kubernetes_pod_annotation_prometheus_io_port\n          -
+            __meta_kubernetes_pod_ip\n          target_label: __address__\n        -
+            action: labelmap\n          regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)\n
+            \         replacement: __param_$1\n        - action: labelmap\n          regex:
+            __meta_kubernetes_pod_label_(.+)\n        - action: replace\n          source_labels:\n
+            \         - __meta_kubernetes_namespace\n          target_label: namespace\n
+            \       - action: replace\n          source_labels:\n          - __meta_kubernetes_pod_name\n
+            \         target_label: pod\n        - action: drop\n          regex:
+            Pending|Succeeded|Failed|Completed\n          source_labels:\n          -
+            __meta_kubernetes_pod_phase\n        - action: replace\n          source_labels:\n
+            \         - __meta_kubernetes_pod_node_name\n          target_label: node\n
+            \       scrape_interval: 5m\n        scrape_timeout: 30s"
+        repoURL: https://prometheus-community.github.io/helm-charts
+        targetRevision: 65.2.0
+    revision: 65.2.0
+    status: Synced

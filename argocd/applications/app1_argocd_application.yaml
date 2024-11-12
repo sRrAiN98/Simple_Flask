@@ -5,12 +5,12 @@ metadata:
     kubectl.kubernetes.io/last-applied-configuration: |
       {"apiVersion":"argoproj.io/v1alpha1","kind":"Application","metadata":{"annotations":{},"labels":{"argocd.argoproj.io/instance":"application"},"name":"app1","namespace":"argocd"},"spec":{"destination":{"namespace":"web","server":"https://kubernetes.default.svc"},"project":"default","source":{"helm":{"valueFiles":["values.yaml"]},"path":"Helm_Charts/AppOfApp/templates/app1","repoURL":"https://github.com/sRrAiN98/Simple_Flask.git","targetRevision":"main"},"syncPolicy":{"automated":{},"syncOptions":["CreateNamespace=true"]}}}
   creationTimestamp: "2024-10-13T13:24:01Z"
-  generation: 523
+  generation: 14405
   labels:
     argocd.argoproj.io/instance: application
   name: app1
   namespace: argocd
-  resourceVersion: "461083"
+  resourceVersion: "7359023"
   uid: 3d8ea6b2-64c2-4f32-ab4e-6c217a529383
 spec:
   destination:
@@ -29,15 +29,9 @@ spec:
     syncOptions:
     - CreateNamespace=true
 status:
-  conditions:
-  - lastTransitionTime: "2024-10-14T13:36:02Z"
-    message: 'Failed to load target state: failed to generate manifest for source
-      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
-      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
-    type: ComparisonError
   controllerNamespace: argocd
   health:
-    status: Progressing
+    status: Healthy
   history:
   - deployStartedAt: "2024-10-13T13:24:01Z"
     deployedAt: "2024-10-13T13:24:09Z"
@@ -78,20 +72,47 @@ status:
       path: Helm_Charts/AppOfApp/templates/app1
       repoURL: https://github.com/sRrAiN98/Simple_Flask.git
       targetRevision: main
+  - deployStartedAt: "2024-10-15T08:59:31Z"
+    deployedAt: "2024-10-15T08:59:35Z"
+    id: 3
+    initiatedBy:
+      automated: true
+    revision: dc3c273a84183e07e88d984021516b107e6a9e41
+    source:
+      helm:
+        valueFiles:
+        - values.yaml
+      path: Helm_Charts/AppOfApp/templates/app1
+      repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+      targetRevision: main
+  - deployStartedAt: "2024-11-05T03:40:23Z"
+    deployedAt: "2024-11-05T03:40:28Z"
+    id: 4
+    initiatedBy:
+      username: viewer
+    revision: ded365d32b77cb6d30d37395019c90afe9fca652
+    source:
+      helm:
+        valueFiles:
+        - values.yaml
+      path: Helm_Charts/AppOfApp/templates/app1
+      repoURL: https://github.com/sRrAiN98/Simple_Flask.git
+      targetRevision: main
   operationState:
-    finishedAt: "2024-10-13T13:50:54Z"
+    finishedAt: "2024-11-05T03:40:28Z"
     message: successfully synced (all tasks run)
     operation:
       initiatedBy:
-        automated: true
-      retry:
-        limit: 5
+        username: viewer
+      retry: {}
       sync:
-        revision: 112d8016d82e5a036942a339ed4750b8f7868249
+        revision: ded365d32b77cb6d30d37395019c90afe9fca652
         syncOptions:
         - CreateNamespace=true
+        syncStrategy:
+          hook: {}
     phase: Succeeded
-    startedAt: "2024-10-13T13:50:49Z"
+    startedAt: "2024-11-05T03:40:23Z"
     syncResult:
       resources:
       - group: policy
@@ -160,13 +181,13 @@ status:
       - group: cert-manager.io
         hookPhase: Running
         kind: Certificate
-        message: certificate.cert-manager.io/app1-tls created
+        message: certificate.cert-manager.io/app1-tls unchanged
         name: app1-tls
         namespace: istio-system
         status: Synced
         syncPhase: Sync
         version: v1
-      revision: 112d8016d82e5a036942a339ed4750b8f7868249
+      revision: ded365d32b77cb6d30d37395019c90afe9fca652
       source:
         helm:
           valueFiles:
@@ -174,21 +195,19 @@ status:
         path: Helm_Charts/AppOfApp/templates/app1
         repoURL: https://github.com/sRrAiN98/Simple_Flask.git
         targetRevision: main
-  reconciledAt: "2024-10-14T13:48:02Z"
+  reconciledAt: "2024-11-12T14:07:12Z"
   resources:
   - health:
       status: Healthy
     kind: Service
     name: app1
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - kind: ServiceAccount
     name: app1
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: apps
     health:
@@ -196,8 +215,7 @@ status:
     kind: Deployment
     name: app1
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: autoscaling
     health:
@@ -206,46 +224,39 @@ status:
     kind: HorizontalPodAutoscaler
     name: app1
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v2
   - group: cert-manager.io
     health:
-      message: Issuing certificate as Secret does not exist
-      status: Progressing
+      message: Certificate is up to date and has not expired
+      status: Healthy
     kind: Certificate
     name: app1-tls
     namespace: istio-system
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: networking.istio.io
     kind: Gateway
     name: app1
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: networking.istio.io
     kind: VirtualService
     name: app1
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: policy
     kind: PodDisruptionBudget
     name: app1
     namespace: web
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
+  sourceType: Helm
   summary:
-    externalURLs:
-    - http://app1.srrain.store/.well-known/acme-challenge/6L8fJ8OTu2X-slCwzD3byTcO_cpN3X0DXmHP260iqT0
     images:
     - docker.io/istio/proxyv2:1.23.2
-    - quay.io/jetstack/cert-manager-acmesolver:v1.16.1
     - tkavna123/app1:latest
   sync:
     comparedTo:
@@ -259,4 +270,5 @@ status:
         path: Helm_Charts/AppOfApp/templates/app1
         repoURL: https://github.com/sRrAiN98/Simple_Flask.git
         targetRevision: main
-    status: Unknown
+    revision: ded365d32b77cb6d30d37395019c90afe9fca652
+    status: Synced

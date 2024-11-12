@@ -1,0 +1,30 @@
+apiVersion: v1
+data:
+  root-cert.pem: |
+    -----BEGIN CERTIFICATE-----
+    MIIC/DCCAeSgAwIBAgIQDO75TxXZx261ANC79UG6AjANBgkqhkiG9w0BAQsFADAY
+    MRYwFAYDVQQKEw1jbHVzdGVyLmxvY2FsMB4XDTI0MTAxMjE1MDczOFoXDTM0MTAx
+    MDE1MDczOFowGDEWMBQGA1UEChMNY2x1c3Rlci5sb2NhbDCCASIwDQYJKoZIhvcN
+    AQEBBQADggEPADCCAQoCggEBANRaouu33PWoHx+GAQT4/sInwTfrm3aojMC4FQmP
+    n/GAxU5DUZj5Ka5H/Z38Z2jQudy2MNiVySA4A5iojPRpClCRdecjaBbrDTlhJYri
+    A/p5iF48HettZoeSMe0AEZArxRub01//ztR3Y8epQkxRqNoc4b1Lqu/LS0j1NA3L
+    piCWbsKHQUBbgrPaQdYxK5QZ8jU5E3QwrY5lFcwThZY63pHLaSpxUXCG+UUeFdD4
+    2T/tupN1D8xSQqEsw2CBh/dRd1dQ4U4LePW2j+gv5zYoU4rIX5EHNbutk9AsptRr
+    FFL6SWTpm17UlrKvNNCZCSbzD8hdKNyfo5MjJasefFgNwfUCAwEAAaNCMEAwDgYD
+    VR0PAQH/BAQDAgIEMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFIL7GR4riVzC
+    wQd8B8tGhb/+LyflMA0GCSqGSIb3DQEBCwUAA4IBAQArqRi8QFITb9IG0FJIuHPu
+    7fKnOcwUG02OwujfUbePKAmyIYhejY/j6dUhJLXzpsUVb+vThTdeipEIXg4KQb+h
+    tm0j51HhVzIIETlcq7SZiAZfioOOUNnnkryfyP/JVIV51MbDnTOd9qwIcZoGYSx5
+    wZxVqCwx8l89oE624fbaiqebrsXAw7uy0X4vl15SU0G5pj0D12NyJIkYhzI/l5r+
+    4X4DZvUjvL2vXI1pe0XR5qhTHT+oga5ozfWu/DS2El7fLNhfsmGxwyG+KR9h/U6j
+    jnQjuyTvm4owV6ywyYVQE5/La5RHBd4HHAmBHHLwmj3zSVc+KCLwsxgka07Zr2/Y
+    -----END CERTIFICATE-----
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2024-10-12T15:07:40Z"
+  labels:
+    istio.io/config: "true"
+  name: istio-ca-root-cert
+  namespace: argocd
+  resourceVersion: "4361"
+  uid: ded0a13e-e16a-4c5c-8599-5e6e271f50bf

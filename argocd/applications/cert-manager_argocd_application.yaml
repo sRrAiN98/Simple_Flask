@@ -2,10 +2,10 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   creationTimestamp: "2024-10-12T15:14:45Z"
-  generation: 953
+  generation: 13664
   name: cert-manager
   namespace: argocd
-  resourceVersion: "461088"
+  resourceVersion: "7359028"
   uid: be93ee17-1554-4103-8b05-6ddb164e18fb
 spec:
   destination:
@@ -25,12 +25,6 @@ spec:
     syncOptions:
     - CreateNamespace=true
 status:
-  conditions:
-  - lastTransitionTime: "2024-10-14T13:33:02Z"
-    message: 'Failed to load target state: failed to generate manifest for source
-      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
-      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
-    type: ComparisonError
   controllerNamespace: argocd
   health:
     status: Healthy
@@ -864,61 +858,83 @@ status:
           values: 'installCRDs: true'
         repoURL: https://charts.jetstack.io
         targetRevision: v1.16.1
-  reconciledAt: "2024-10-14T13:48:02Z"
+  reconciledAt: "2024-11-12T14:07:12Z"
   resources:
   - health:
       status: Healthy
     kind: Service
     name: cert-manager
     namespace: cert-manager
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - health:
       status: Healthy
     kind: Service
     name: cert-manager-cainjector
     namespace: cert-manager
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - health:
       status: Healthy
     kind: Service
     name: cert-manager-webhook
     namespace: cert-manager
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - kind: ServiceAccount
     name: cert-manager
     namespace: cert-manager
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - kind: ServiceAccount
     name: cert-manager-cainjector
     namespace: cert-manager
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - kind: ServiceAccount
     name: cert-manager-webhook
     namespace: cert-manager
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: admissionregistration.k8s.io
     kind: MutatingWebhookConfiguration
     name: cert-manager-webhook
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: admissionregistration.k8s.io
     kind: ValidatingWebhookConfiguration
     name: cert-manager-webhook
-    requiresPruning: true
-    status: Unknown
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: certificaterequests.cert-manager.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: certificates.cert-manager.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: challenges.acme.cert-manager.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: clusterissuers.cert-manager.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: issuers.cert-manager.io
+    status: Synced
+    version: v1
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    name: orders.acme.cert-manager.io
+    status: Synced
     version: v1
   - group: apps
     health:
@@ -926,8 +942,7 @@ status:
     kind: Deployment
     name: cert-manager
     namespace: cert-manager
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: apps
     health:
@@ -935,8 +950,7 @@ status:
     kind: Deployment
     name: cert-manager-cainjector
     namespace: cert-manager
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: apps
     health:
@@ -944,203 +958,172 @@ status:
     kind: Deployment
     name: cert-manager-webhook
     namespace: cert-manager
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: cert-manager-cainjector
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: cert-manager-cluster-view
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: cert-manager-controller-approve:cert-manager-io
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: cert-manager-controller-certificates
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: cert-manager-controller-certificatesigningrequests
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: cert-manager-controller-challenges
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: cert-manager-controller-clusterissuers
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: cert-manager-controller-ingress-shim
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: cert-manager-controller-issuers
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: cert-manager-controller-orders
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: cert-manager-edit
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: cert-manager-view
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: cert-manager-webhook:subjectaccessreviews
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRoleBinding
     name: cert-manager-cainjector
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRoleBinding
     name: cert-manager-controller-approve:cert-manager-io
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRoleBinding
     name: cert-manager-controller-certificates
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRoleBinding
     name: cert-manager-controller-certificatesigningrequests
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRoleBinding
     name: cert-manager-controller-challenges
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRoleBinding
     name: cert-manager-controller-clusterissuers
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRoleBinding
     name: cert-manager-controller-ingress-shim
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRoleBinding
     name: cert-manager-controller-issuers
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRoleBinding
     name: cert-manager-controller-orders
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRoleBinding
     name: cert-manager-webhook:subjectaccessreviews
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: Role
     name: cert-manager-tokenrequest
     namespace: cert-manager
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: Role
     name: cert-manager-webhook:dynamic-serving
     namespace: cert-manager
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: Role
     name: cert-manager-cainjector:leaderelection
     namespace: kube-system
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: Role
     name: cert-manager:leaderelection
     namespace: kube-system
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: RoleBinding
     name: cert-manager-cert-manager-tokenrequest
     namespace: cert-manager
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: RoleBinding
     name: cert-manager-webhook:dynamic-serving
     namespace: cert-manager
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: RoleBinding
     name: cert-manager-cainjector:leaderelection
     namespace: kube-system
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: RoleBinding
     name: cert-manager:leaderelection
     namespace: kube-system
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
+  sourceType: Helm
   summary:
     images:
     - quay.io/jetstack/cert-manager-cainjector:v1.16.1
@@ -1159,4 +1142,5 @@ status:
           values: 'installCRDs: true'
         repoURL: https://charts.jetstack.io
         targetRevision: v1.16.1
-    status: Unknown
+    revision: v1.16.1
+    status: Synced

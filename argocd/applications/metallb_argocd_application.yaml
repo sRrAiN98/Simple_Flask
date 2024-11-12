@@ -2,10 +2,10 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   creationTimestamp: "2024-10-12T15:39:28Z"
-  generation: 955
+  generation: 13605
   name: metallb
   namespace: argocd
-  resourceVersion: "461086"
+  resourceVersion: "7359313"
   uid: b0fe917f-7a66-4955-be9c-a13dfac43d1c
 spec:
   destination:
@@ -32,10 +32,11 @@ spec:
     - CreateNamespace=true
 status:
   conditions:
-  - lastTransitionTime: "2024-10-14T13:36:02Z"
+  - lastTransitionTime: "2024-11-12T14:07:12Z"
     message: 'Failed to load target state: failed to generate manifest for source
-      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
-      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
+      1 of 1: rpc error: code = Unknown desc = `helm pull --destination /tmp/06bc14e6-18b3-429c-ade9-b30ce3c43fa1
+      --version 6.3.13 --repo https://charts.bitnami.com/bitnami metallb` failed timeout
+      after 1m30s'
     type: ComparisonError
   controllerNamespace: argocd
   health:
@@ -402,7 +403,7 @@ status:
                     - 192.168.31.101-192.168.31.110
         repoURL: https://charts.bitnami.com/bitnami
         targetRevision: 6.3.13
-  reconciledAt: "2024-10-14T13:48:02Z"
+  reconciledAt: "2024-11-12T14:07:12Z"
   resources:
   - kind: ConfigMap
     name: metallb-config

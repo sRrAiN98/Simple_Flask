@@ -1,0 +1,256 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-10-15T10:23:57Z"
+  generation: 12314
+  name: metrics-server
+  namespace: argocd
+  resourceVersion: "7359048"
+  uid: 4ea4c3b2-cd99-40f9-97fe-23d35d3551d8
+spec:
+  destination:
+    namespace: kube-system
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: metrics-server
+    helm:
+      valueFiles:
+      - values.yaml
+      values: |-
+        args:
+          - --kubelet-insecure-tls
+    repoURL: https://kubernetes-sigs.github.io/metrics-server/
+    targetRevision: 3.12.2
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
+status:
+  controllerNamespace: argocd
+  health:
+    status: Healthy
+  history:
+  - deployStartedAt: "2024-10-15T10:23:58Z"
+    deployedAt: "2024-10-15T10:24:01Z"
+    id: 0
+    initiatedBy:
+      automated: true
+    revision: 3.12.2
+    source:
+      chart: metrics-server
+      helm:
+        valueFiles:
+        - values.yaml
+      repoURL: https://kubernetes-sigs.github.io/metrics-server/
+      targetRevision: 3.12.2
+  - deployStartedAt: "2024-10-15T10:27:52Z"
+    deployedAt: "2024-10-15T10:27:54Z"
+    id: 1
+    initiatedBy:
+      automated: true
+    revision: 3.12.2
+    source:
+      chart: metrics-server
+      helm:
+        valueFiles:
+        - values.yaml
+        values: |-
+          args:
+            - --kubelet-insecure-tls
+      repoURL: https://kubernetes-sigs.github.io/metrics-server/
+      targetRevision: 3.12.2
+  operationState:
+    finishedAt: "2024-10-15T10:27:54Z"
+    message: successfully synced (all tasks run)
+    operation:
+      initiatedBy:
+        automated: true
+      retry:
+        limit: 5
+      sync:
+        revision: 3.12.2
+        syncOptions:
+        - CreateNamespace=true
+    phase: Succeeded
+    startedAt: "2024-10-15T10:27:52Z"
+    syncResult:
+      resources:
+      - group: ""
+        hookPhase: Running
+        kind: ServiceAccount
+        message: serviceaccount/metrics-server unchanged
+        name: metrics-server
+        namespace: kube-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Running
+        kind: ClusterRole
+        message: clusterrole.rbac.authorization.k8s.io/system:metrics-server-aggregated-reader
+          reconciled. clusterrole.rbac.authorization.k8s.io/system:metrics-server-aggregated-reader
+          unchanged
+        name: system:metrics-server-aggregated-reader
+        namespace: kube-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Running
+        kind: ClusterRole
+        message: clusterrole.rbac.authorization.k8s.io/system:metrics-server reconciled.
+          clusterrole.rbac.authorization.k8s.io/system:metrics-server unchanged
+        name: system:metrics-server
+        namespace: kube-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Running
+        kind: ClusterRoleBinding
+        message: clusterrolebinding.rbac.authorization.k8s.io/metrics-server:system:auth-delegator
+          reconciled. clusterrolebinding.rbac.authorization.k8s.io/metrics-server:system:auth-delegator
+          unchanged
+        name: metrics-server:system:auth-delegator
+        namespace: kube-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Running
+        kind: ClusterRoleBinding
+        message: clusterrolebinding.rbac.authorization.k8s.io/system:metrics-server
+          reconciled. clusterrolebinding.rbac.authorization.k8s.io/system:metrics-server
+          unchanged
+        name: system:metrics-server
+        namespace: kube-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Running
+        kind: RoleBinding
+        message: rolebinding.rbac.authorization.k8s.io/metrics-server-auth-reader
+          reconciled. rolebinding.rbac.authorization.k8s.io/metrics-server-auth-reader
+          unchanged
+        name: metrics-server-auth-reader
+        namespace: kube-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Running
+        kind: Service
+        message: service/metrics-server unchanged
+        name: metrics-server
+        namespace: kube-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apps
+        hookPhase: Running
+        kind: Deployment
+        message: deployment.apps/metrics-server configured
+        name: metrics-server
+        namespace: kube-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apiregistration.k8s.io
+        hookPhase: Running
+        kind: APIService
+        message: apiservice.apiregistration.k8s.io/v1beta1.metrics.k8s.io unchanged
+        name: v1beta1.metrics.k8s.io
+        namespace: kube-system
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      revision: 3.12.2
+      source:
+        chart: metrics-server
+        helm:
+          valueFiles:
+          - values.yaml
+          values: |-
+            args:
+              - --kubelet-insecure-tls
+        repoURL: https://kubernetes-sigs.github.io/metrics-server/
+        targetRevision: 3.12.2
+  reconciledAt: "2024-11-12T14:07:12Z"
+  resources:
+  - health:
+      status: Healthy
+    kind: Service
+    name: metrics-server
+    namespace: kube-system
+    status: Synced
+    version: v1
+  - kind: ServiceAccount
+    name: metrics-server
+    namespace: kube-system
+    status: Synced
+    version: v1
+  - group: apiregistration.k8s.io
+    health:
+      message: 'Passed: all checks passed'
+      status: Healthy
+    kind: APIService
+    name: v1beta1.metrics.k8s.io
+    status: Synced
+    version: v1
+  - group: apps
+    health:
+      status: Healthy
+    kind: Deployment
+    name: metrics-server
+    namespace: kube-system
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: system:metrics-server
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: system:metrics-server-aggregated-reader
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRoleBinding
+    name: metrics-server:system:auth-delegator
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRoleBinding
+    name: system:metrics-server
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: RoleBinding
+    name: metrics-server-auth-reader
+    namespace: kube-system
+    status: Synced
+    version: v1
+  sourceType: Helm
+  summary:
+    images:
+    - registry.k8s.io/metrics-server/metrics-server:v0.7.2
+  sync:
+    comparedTo:
+      destination:
+        namespace: kube-system
+        server: https://kubernetes.default.svc
+      source:
+        chart: metrics-server
+        helm:
+          valueFiles:
+          - values.yaml
+          values: |-
+            args:
+              - --kubelet-insecure-tls
+        repoURL: https://kubernetes-sigs.github.io/metrics-server/
+        targetRevision: 3.12.2
+    revision: 3.12.2
+    status: Synced

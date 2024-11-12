@@ -2,10 +2,10 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   creationTimestamp: "2024-10-14T01:20:56Z"
-  generation: 255
+  generation: 12969
   name: hostpath-provisioner
   namespace: argocd
-  resourceVersion: "461079"
+  resourceVersion: "7359049"
   uid: 70e333c9-2381-47f0-9235-3bad55521662
 spec:
   destination:
@@ -24,12 +24,6 @@ spec:
     syncOptions:
     - CreateNamespace=true
 status:
-  conditions:
-  - lastTransitionTime: "2024-10-14T13:33:02Z"
-    message: 'Failed to load target state: failed to generate manifest for source
-      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
-      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
-    type: ComparisonError
   controllerNamespace: argocd
   health:
     status: Healthy
@@ -168,13 +162,12 @@ status:
           - values.yaml
         repoURL: https://charts.rimusz.net
         targetRevision: 0.2.13
-  reconciledAt: "2024-10-14T13:48:02Z"
+  reconciledAt: "2024-11-12T14:07:12Z"
   resources:
   - kind: ServiceAccount
     name: hostpath-provisioner
     namespace: utils
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: apps
     health:
@@ -182,41 +175,36 @@ status:
     kind: Deployment
     name: hostpath-provisioner
     namespace: utils
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: hostpath-provisioner
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRoleBinding
     name: hostpath-provisioner
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: Role
     name: hostpath-provisioner-leader-locking
     namespace: utils
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: RoleBinding
     name: hostpath-provisioner-leader-locking
     namespace: utils
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: storage.k8s.io
     kind: StorageClass
     name: hostpath
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
+  sourceType: Helm
   summary:
     images:
     - quay.io/rimusz/hostpath-provisioner:v0.2.5
@@ -232,4 +220,5 @@ status:
           - values.yaml
         repoURL: https://charts.rimusz.net
         targetRevision: 0.2.13
-    status: Unknown
+    revision: 0.2.13
+    status: Synced

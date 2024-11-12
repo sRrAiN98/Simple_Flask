@@ -2,10 +2,10 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   creationTimestamp: "2024-10-13T03:24:02Z"
-  generation: 721
+  generation: 4791
   name: ingress-nginx
   namespace: argocd
-  resourceVersion: "461084"
+  resourceVersion: "2721842"
   uid: 8cc81ac5-79e4-46b5-8c7e-69c4a6a6fa8d
 spec:
   destination:
@@ -24,12 +24,6 @@ spec:
     syncOptions:
     - CreateNamespace=true
 status:
-  conditions:
-  - lastTransitionTime: "2024-10-14T13:33:02Z"
-    message: 'Failed to load target state: failed to generate manifest for source
-      1 of 1: rpc error: code = Unavailable desc = connection error: desc = "transport:
-      Error while dialing: dial tcp: lookup argocd-repo-server: i/o timeout"'
-    type: ComparisonError
   controllerNamespace: argocd
   health:
     status: Healthy
@@ -338,41 +332,36 @@ status:
           - values.yaml
         repoURL: https://kubernetes.github.io/ingress-nginx
         targetRevision: 4.11.3
-  reconciledAt: "2024-10-14T13:48:02Z"
+  reconciledAt: "2024-10-23T04:14:41Z"
   resources:
   - kind: ConfigMap
     name: ingress-nginx-controller
     namespace: ingress-nginx
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - health:
       status: Healthy
     kind: Service
     name: ingress-nginx-controller
     namespace: ingress-nginx
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - health:
       status: Healthy
     kind: Service
     name: ingress-nginx-controller-admission
     namespace: ingress-nginx
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - kind: ServiceAccount
     name: ingress-nginx
     namespace: ingress-nginx
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: admissionregistration.k8s.io
     kind: ValidatingWebhookConfiguration
     name: ingress-nginx-admission
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: apps
     health:
@@ -380,41 +369,36 @@ status:
     kind: Deployment
     name: ingress-nginx-controller
     namespace: ingress-nginx
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: networking.k8s.io
     kind: IngressClass
     name: nginx
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: ingress-nginx
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: ClusterRoleBinding
     name: ingress-nginx
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: Role
     name: ingress-nginx
     namespace: ingress-nginx
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
   - group: rbac.authorization.k8s.io
     kind: RoleBinding
     name: ingress-nginx
     namespace: ingress-nginx
-    requiresPruning: true
-    status: Unknown
+    status: Synced
     version: v1
+  sourceType: Helm
   summary:
     images:
     - registry.k8s.io/ingress-nginx/controller:v1.11.3@sha256:d56f135b6462cfc476447cfe564b83a45e8bb7da2774963b00d12161112270b7
@@ -430,4 +414,5 @@ status:
           - values.yaml
         repoURL: https://kubernetes.github.io/ingress-nginx
         targetRevision: 4.11.3
-    status: Unknown
+    revision: 4.11.3
+    status: Synced
